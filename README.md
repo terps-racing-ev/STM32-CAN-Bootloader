@@ -1,6 +1,5 @@
 # STM32-CAN-Bootloader
-<<<<<<< HEAD
-CAN Enabled virtual bootloader for STM32L432 used in BMS and SDC
+CAN Enabled virtual bootloader for STM32L432
 =======
 
 A CAN-based bootloader for STM32L432 microcontrollers, designed for firmware updates over CAN bus (BMS and SDC).
