@@ -25,12 +25,8 @@ from typing import Optional, Tuple
 from dataclasses import dataclass
 
 # Import the PCAN driver
-try:
-    from drivers.PCAN_Driver import PCANDriver, PCANChannel, PCANBaudRate, CANMessage
-except ImportError:
-    print("Error: PCAN_Driver.py not found in the same directory")
-    print("Please ensure PCAN_Driver.py is in the same folder as this script")
-    sys.exit(1)
+from PCAN_Driver import PCANDriver, PCANChannel, PCANBaudRate, CANMessage
+
 
 
 # ============================================================================
