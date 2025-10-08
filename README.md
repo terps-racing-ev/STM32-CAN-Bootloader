@@ -17,7 +17,7 @@ Use the `Flash_Application.py` script to flash firmware to the device over CAN b
 
 Your application should be a *.bin file with the correct changes to its memory locations. (see below)
 
-The Python script will flash the application, then read back the entire contents of the flash to verify flashing was succesful, it will then tell the MCU to jump to the application.
+The Python script will flash the application, then read back the entire contents of the flash to verify flashing was successful, it will then tell the MCU to jump to the application.
 
 ## Application Development
 
