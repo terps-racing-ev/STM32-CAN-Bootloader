@@ -37,7 +37,7 @@ extern "C" {
 #define APP_VALID_FLAG_COMPLEMENT   0x21524110  /* Bitwise NOT of magic number */
 
 /* Bootloader timeout */
-#define BOOTLOADER_TIMEOUT_MS       5000        /* 5 second timeout */
+#define BOOTLOADER_TIMEOUT_MS       10000        /* 5 second timeout */
 
 /* Flash operation definitions */
 /* Note: FLASH_PAGE_SIZE already defined in stm32l4xx_hal_flash.h */

@@ -41,11 +41,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  18 .debug_line   00006feb  00000000  00000000  00013164  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_str    00002e01  00000000  00000000  0001a14f  2**0
+ 19 .debug_str    00002dfb  00000000  00000000  0001a14f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_frame  00001254  00000000  00000000  0001cf50  2**2
+ 20 .debug_frame  00001254  00000000  00000000  0001cf4c  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000004a  00000000  00000000  0001e1a4  2**0
+ 21 .debug_line_str 00000044  00000000  00000000  0001e1a0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -848,7 +848,7 @@ uint8_t Bootloader_CheckApplicationValidFlag(void)
  800066c:	d1e7      	bne.n	800063e <Bootloader_Main+0x42>
  800066e:	f000 fa17 	bl	8000aa0 <HAL_GetTick>
  8000672:	1b40      	subs	r0, r0, r5
- 8000674:	f241 3387 	movw	r3, #4999	@ 0x1387
+ 8000674:	f242 730f 	movw	r3, #9999	@ 0x270f
  8000678:	4298      	cmp	r0, r3
  800067a:	d9e0      	bls.n	800063e <Bootloader_Main+0x42>
             if (Bootloader_CheckApplicationValidFlag())

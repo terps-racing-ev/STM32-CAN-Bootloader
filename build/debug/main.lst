@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
   29:Core/Src/main.c **** 
   30:Core/Src/main.c **** /* USER CODE END PTD */
   31:Core/Src/main.c **** 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 2
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 2
 
 
   32:Core/Src/main.c **** /* Private define ------------------------------------------------------------*/
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
   86:Core/Src/main.c **** 
   87:Core/Src/main.c ****   /* USER CODE END SysInit */
   88:Core/Src/main.c **** 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 3
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 3
 
 
   89:Core/Src/main.c ****   /* Initialize all configured peripherals */
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  143:Core/Src/main.c ****   */
  144:Core/Src/main.c ****   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
  145:Core/Src/main.c ****                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 4
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 4
 
 
  146:Core/Src/main.c ****   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  200:Core/Src/main.c **** {
   28              		.loc 1 200 1 view -0
   29              		.cfi_startproc
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 5
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 5
 
 
   30              		@ args = 0, pretend = 0, frame = 8
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  215:Core/Src/main.c **** /* USER CODE END 4 */
  216:Core/Src/main.c **** 
  217:Core/Src/main.c **** /**
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 6
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 6
 
 
  218:Core/Src/main.c ****   * @brief  This function is executed in case of error occurrence.
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
   37:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
   38:Drivers/CMSIS/Include/cmsis_gcc.h **** 
   39:Drivers/CMSIS/Include/cmsis_gcc.h **** /* CMSIS compiler specific defines */
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 7
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 7
 
 
   40:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __ASM
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
   94:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __UNALIGNED_UINT32_WRITE
   95:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic push
   96:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wpacked"
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 8
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 8
 
 
   97:Drivers/CMSIS/Include/cmsis_gcc.h ****   #pragma GCC diagnostic ignored "-Wattributes"
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  151:Drivers/CMSIS/Include/cmsis_gcc.h ****   for (__copy_table_t const* pTable = &__copy_table_start__; pTable < &__copy_table_end__; ++pTable
  152:Drivers/CMSIS/Include/cmsis_gcc.h ****     for(uint32_t i=0u; i<pTable->wlen; ++i) {
  153:Drivers/CMSIS/Include/cmsis_gcc.h ****       pTable->dest[i] = pTable->src[i];
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 9
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 9
 
 
  154:Drivers/CMSIS/Include/cmsis_gcc.h ****     }
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
   82              		.loc 2 207 27 view .LVU10
   83              	.LBB6:
  208:Drivers/CMSIS/Include/cmsis_gcc.h **** {
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 10
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 10
 
 
  209:Drivers/CMSIS/Include/cmsis_gcc.h ****   __ASM volatile ("cpsid i" : : : "memory");
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  128 000c 0023     		movs	r3, #0
  129 000e 8360     		str	r3, [r0, #8]
  175:Core/Src/main.c ****   hcan1.Init.TimeSeg1 = CAN_BS1_13TQ;
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 11
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 11
 
 
  130              		.loc 1 175 3 is_stmt 1 view .LVU22
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  164 002e 00B9     		cbnz	r0, .L10
  192:Core/Src/main.c **** 
  165              		.loc 1 192 1 view .LVU43
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 12
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 12
 
 
  166 0030 08BD     		pop	{r3, pc}
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  214 001a 4FF40070 		mov	r0, #512
  215 001e FFF7FEFF 		bl	HAL_PWREx_ControlVoltageScaling
  216              	.LVL3:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 13
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 13
 
 
  124:Core/Src/main.c ****   {
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  147:Core/Src/main.c ****   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
  253              		.loc 1 147 3 is_stmt 1 view .LVU70
  147:Core/Src/main.c ****   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 14
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 14
 
 
  254              		.loc 1 147 35 is_stmt 0 view .LVU71
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  299              	main:
  300              	.LFB132:
   67:Core/Src/main.c **** 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 15
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 15
 
 
  301              		.loc 1 67 1 view -0
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  347      00000000 
  347      00000000 
  347      00000000 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 16
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 16
 
 
  348              		.text
@@ -914,26 +914,26 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 1
  358              		.file 11 "Core/Inc/bootloader.h"
  359              		.file 12 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
  360              		.file 13 "<built-in>"
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccethcog.s 			page 17
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s 			page 17
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 main.c
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:21     .text.MX_GPIO_Init:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:26     .text.MX_GPIO_Init:00000000 MX_GPIO_Init
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:59     .text.MX_GPIO_Init:0000001c $d
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:64     .text.Error_Handler:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:70     .text.Error_Handler:00000000 Error_Handler
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:102    .text.MX_CAN1_Init:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:107    .text.MX_CAN1_Init:00000000 MX_CAN1_Init
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:174    .text.MX_CAN1_Init:00000038 $d
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:346    .bss.hcan1:00000000 hcan1
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:180    .text.SystemClock_Config:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:186    .text.SystemClock_Config:00000000 SystemClock_Config
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:293    .text.main:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:299    .text.main:00000000 main
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:337    .text.main:00000020 $d
-C:\Users\Ali\AppData\Local\Temp\ccethcog.s:343    .bss.hcan1:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:21     .text.MX_GPIO_Init:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:26     .text.MX_GPIO_Init:00000000 MX_GPIO_Init
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:59     .text.MX_GPIO_Init:0000001c $d
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:64     .text.Error_Handler:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:70     .text.Error_Handler:00000000 Error_Handler
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:102    .text.MX_CAN1_Init:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:107    .text.MX_CAN1_Init:00000000 MX_CAN1_Init
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:174    .text.MX_CAN1_Init:00000038 $d
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:346    .bss.hcan1:00000000 hcan1
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:180    .text.SystemClock_Config:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:186    .text.SystemClock_Config:00000000 SystemClock_Config
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:293    .text.main:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:299    .text.main:00000000 main
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:337    .text.main:00000020 $d
+C:\Users\Ali\AppData\Local\Temp\ccnN4dcG.s:343    .bss.hcan1:00000000 $d
 
 UNDEFINED SYMBOLS
 HAL_CAN_Init
