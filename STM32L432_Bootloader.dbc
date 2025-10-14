@@ -11,7 +11,7 @@ BS_:
 
 BU_: Host Bootloader Application
 
-BO_ 1792 Bootloader_Response: 8 Bootloader
+BO_ 2684356352 Bootloader_Response: 8 Bootloader
  SG_ ResponseType : 0|8@1+ (1,0) [0|255] ""  Host
  SG_ DataByte0 : 8|8@1+ (1,0) [0|255] ""  Host
  SG_ DataByte1 : 16|8@1+ (1,0) [0|255] ""  Host
@@ -21,20 +21,20 @@ BO_ 1792 Bootloader_Response: 8 Bootloader
  SG_ DataByte5 : 48|8@1+ (1,0) [0|255] ""  Host
  SG_ DataByte6 : 56|8@1+ (1,0) [0|255] ""  Host
 
-CM_ BO_ 1792 "Bootloader response messages to host PC. Contains ACK/NACK, status, data, and error information.";
-CM_ SG_ 1792 ResponseType "Type of response: ACK(0x10), NACK(0x11), ERROR(0x12), BUSY(0x13), READY(0x14), DATA(0x15), JUMP_INFO(0x16)";
-CM_ SG_ 1792 DataByte0 "Generic data byte 0 - ErrorCode for NACK/ERROR, Version for READY, Data for READ responses";
-CM_ SG_ 1792 DataByte1 "Generic data byte 1 - State for STATUS, Data for READ responses";
-CM_ SG_ 1792 DataByte2 "Generic data byte 2 - BytesWritten[0] for STATUS, Data for READ responses";
-CM_ SG_ 1792 DataByte3 "Generic data byte 3 - BytesWritten[1] for STATUS, Data for READ responses";
-CM_ SG_ 1792 DataByte4 "Generic data byte 4 - BytesWritten[2] for STATUS, Data for READ responses";
-CM_ SG_ 1792 DataByte5 "Generic data byte 5 - BytesWritten[3] for STATUS, Data for READ responses";
-CM_ SG_ 1792 DataByte6 "Generic data byte 6 - Data for READ responses";
+CM_ BO_ 2684356352 "Bootloader response messages to host PC. Contains ACK/NACK, status, data, and error information.";
+CM_ SG_ 2684356352 ResponseType "Type of response: ACK(0x10), NACK(0x11), ERROR(0x12), BUSY(0x13), READY(0x14), DATA(0x15), JUMP_INFO(0x16)";
+CM_ SG_ 2684356352 DataByte0 "Generic data byte 0 - ErrorCode for NACK/ERROR, Version for READY, Data for READ responses";
+CM_ SG_ 2684356352 DataByte1 "Generic data byte 1 - State for STATUS, Data for READ responses";
+CM_ SG_ 2684356352 DataByte2 "Generic data byte 2 - BytesWritten[0] for STATUS, Data for READ responses";
+CM_ SG_ 2684356352 DataByte3 "Generic data byte 3 - BytesWritten[1] for STATUS, Data for READ responses";
+CM_ SG_ 2684356352 DataByte4 "Generic data byte 4 - BytesWritten[2] for STATUS, Data for READ responses";
+CM_ SG_ 2684356352 DataByte5 "Generic data byte 5 - BytesWritten[3] for STATUS, Data for READ responses";
+CM_ SG_ 2684356352 DataByte6 "Generic data byte 6 - Data for READ responses";
 
-VAL_ 1792 ResponseType 16 "ACK" 17 "NACK" 18 "ERROR" 19 "BUSY" 20 "READY" 21 "DATA" 22 "JUMP_INFO" ;
-VAL_ 1792 DataByte0 0 "ERR_NONE" 1 "ERR_INVALID_COMMAND" 2 "ERR_INVALID_ADDRESS" 3 "ERR_FLASH_ERASE_FAILED" 4 "ERR_FLASH_WRITE_FAILED" 5 "ERR_INVALID_DATA_LENGTH" 6 "ERR_NO_VALID_APP" 7 "ERR_TIMEOUT" ;
+VAL_ 2684356352 ResponseType 16 "ACK" 17 "NACK" 18 "ERROR" 19 "BUSY" 20 "READY" 21 "DATA" 22 "JUMP_INFO" ;
+VAL_ 2684356352 DataByte0 0 "ERR_NONE" 1 "ERR_INVALID_COMMAND" 2 "ERR_INVALID_ADDRESS" 3 "ERR_FLASH_ERASE_FAILED" 4 "ERR_FLASH_WRITE_FAILED" 5 "ERR_INVALID_DATA_LENGTH" 6 "ERR_NO_VALID_APP" 7 "ERR_TIMEOUT" ;
 
-BO_ 1793 Host_Command: 8 Host
+BO_ 2684356353 Host_Command: 8 Host
  SG_ CommandType : 0|8@1+ (1,0) [0|255] ""  Bootloader
  SG_ DataByte0 : 8|8@1+ (1,0) [0|255] ""  Bootloader
  SG_ DataByte1 : 16|8@1+ (1,0) [0|255] ""  Bootloader
@@ -44,29 +44,29 @@ BO_ 1793 Host_Command: 8 Host
  SG_ DataByte5 : 48|8@1+ (1,0) [0|255] ""  Bootloader
  SG_ DataByte6 : 56|8@1+ (1,0) [0|255] ""  Bootloader
 
-CM_ BO_ 1793 "Host command messages to bootloader for firmware update operations";
-CM_ SG_ 1793 CommandType "Command from host: ERASE(1), WRITE_FLASH(2), READ_FLASH(3), JUMP(4), STATUS(5), SET_ADDR(6), WRITE_DATA(7)";
-CM_ SG_ 1793 DataByte0 "Data byte 0 - Address[31:24] for SET_ADDRESS, Data for WRITE_DATA, Length for READ_FLASH";
-CM_ SG_ 1793 DataByte1 "Data byte 1 - Address[23:16] for SET_ADDRESS, Data for WRITE_DATA";
-CM_ SG_ 1793 DataByte2 "Data byte 2 - Address[15:8] for SET_ADDRESS, Data for WRITE_DATA";
-CM_ SG_ 1793 DataByte3 "Data byte 3 - Address[7:0] for SET_ADDRESS, Data for WRITE_DATA";
-CM_ SG_ 1793 DataByte4 "Data byte 4 - DataLength for WRITE_DATA (always 0x04)";
-CM_ SG_ 1793 DataByte5 "Data byte 5 - Reserved";
-CM_ SG_ 1793 DataByte6 "Data byte 6 - Reserved";
+CM_ BO_ 2684356353 "Host command messages to bootloader for firmware update operations";
+CM_ SG_ 2684356353 CommandType "Command from host: ERASE(1), WRITE_FLASH(2), READ_FLASH(3), JUMP(4), STATUS(5), SET_ADDR(6), WRITE_DATA(7)";
+CM_ SG_ 2684356353 DataByte0 "Data byte 0 - Address[31:24] for SET_ADDRESS, Data for WRITE_DATA, Length for READ_FLASH";
+CM_ SG_ 2684356353 DataByte1 "Data byte 1 - Address[23:16] for SET_ADDRESS, Data for WRITE_DATA";
+CM_ SG_ 2684356353 DataByte2 "Data byte 2 - Address[15:8] for SET_ADDRESS, Data for WRITE_DATA";
+CM_ SG_ 2684356353 DataByte3 "Data byte 3 - Address[7:0] for SET_ADDRESS, Data for WRITE_DATA";
+CM_ SG_ 2684356353 DataByte4 "Data byte 4 - DataLength for WRITE_DATA (always 0x04)";
+CM_ SG_ 2684356353 DataByte5 "Data byte 5 - Reserved";
+CM_ SG_ 2684356353 DataByte6 "Data byte 6 - Reserved";
 
-VAL_ 1793 CommandType 1 "CMD_ERASE_FLASH" 2 "CMD_WRITE_FLASH" 3 "CMD_READ_FLASH" 4 "CMD_JUMP_TO_APP" 5 "CMD_GET_STATUS" 6 "CMD_SET_ADDRESS" 7 "CMD_WRITE_DATA" ;
+VAL_ 2684356353 CommandType 1 "CMD_ERASE_FLASH" 2 "CMD_WRITE_FLASH" 3 "CMD_READ_FLASH" 4 "CMD_JUMP_TO_APP" 5 "CMD_GET_STATUS" 6 "CMD_SET_ADDRESS" 7 "CMD_WRITE_DATA" ;
 
-BO_ 1794 Bootloader_JumpInfo: 8 Bootloader
+BO_ 2684356354 Bootloader_JumpInfo: 8 Bootloader
  SG_ ResponseType : 0|8@1+ (1,0) [0|255] ""  Host
  SG_ StackPointer : 8|32@1+ (1,0) [0|4294967295] ""  Host
  SG_ ResetVector_High : 40|16@1+ (1,0) [0|65535] ""  Host
  SG_ ResetVector_Low : 56|8@1+ (1,0) [0|255] ""  Host
 
-CM_ BO_ 1794 "Detailed jump to application diagnostics (sent immediately before jumping to application code)";
-CM_ SG_ 1794 ResponseType "Always RESP_JUMP_INFO (0x16) for this message";
-CM_ SG_ 1794 StackPointer "Application initial stack pointer from vector table at 0x08008000. Should be 0x2000xxxx (valid RAM address)";
-CM_ SG_ 1794 ResetVector_High "Application reset handler address bits [23:8]. Combined with ResetVector_Low gives full address";
-CM_ SG_ 1794 ResetVector_Low "Application reset handler address bits [7:0]. LSB should be 1 (Thumb mode). Full address should be 0x0800xxxx";
+CM_ BO_ 2684356354 "Detailed jump to application diagnostics (sent immediately before jumping to application code)";
+CM_ SG_ 2684356354 ResponseType "Always RESP_JUMP_INFO (0x16) for this message";
+CM_ SG_ 2684356354 StackPointer "Application initial stack pointer from vector table at 0x08008000. Should be 0x2000xxxx (valid RAM address)";
+CM_ SG_ 2684356354 ResetVector_High "Application reset handler address bits [23:8]. Combined with ResetVector_Low gives full address";
+CM_ SG_ 2684356354 ResetVector_Low "Application reset handler address bits [7:0]. LSB should be 1 (Thumb mode). Full address should be 0x0800xxxx";
 
 BO_ 258 Application_Heartbeat: 8 Application
  SG_ Counter : 0|8@1+ (1,0) [0|255] ""  Host,Bootloader
@@ -194,9 +194,9 @@ BA_ "GenMsgCycleTime" BO_ 1810 1000;
 BA_ "GenMsgCycleTime" BO_ 1811 1000;
 BA_ "GenMsgCycleTime" BO_ 1824 2000;
 BA_ "GenMsgCycleTime" BO_ 1825 2000;
-BA_ "GenMsgSendType" BO_ 1792 "event";
-BA_ "GenMsgSendType" BO_ 1793 "event";
-BA_ "GenMsgSendType" BO_ 1794 "event";
+BA_ "GenMsgSendType" BO_ 2684356352 "event";
+BA_ "GenMsgSendType" BO_ 2684356353 "event";
+BA_ "GenMsgSendType" BO_ 2684356354 "event";
 BA_ "GenMsgSendType" BO_ 258 "cyclic";
 BA_ "GenMsgSendType" BO_ 1808 "cyclic";
 BA_ "GenMsgSendType" BO_ 1809 "cyclic";

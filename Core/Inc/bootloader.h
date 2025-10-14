@@ -43,9 +43,9 @@ extern "C" {
 /* Note: FLASH_PAGE_SIZE already defined in stm32l4xx_hal_flash.h */
 #define FLASH_TIMEOUT               50000       /* Flash operation timeout */
 
-/* CAN Protocol definitions */
-#define CAN_BOOTLOADER_ID           0x700       /* Bootloader CAN ID */
-#define CAN_HOST_ID                 0x701       /* Host/PC CAN ID */
+/* CAN Protocol definitions - 29-bit Extended IDs */
+#define CAN_BOOTLOADER_ID           0x18000700  /* Bootloader CAN ID (Extended) */
+#define CAN_HOST_ID                 0x18000701  /* Host/PC CAN ID (Extended) */
 
 /* CAN Command IDs */
 #define CMD_ERASE_FLASH             0x01        /* Erase application flash */

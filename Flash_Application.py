@@ -33,9 +33,9 @@ from PCAN_Driver import PCANDriver, PCANChannel, PCANBaudRate, CANMessage
 # Bootloader Protocol Constants
 # ============================================================================
 
-# CAN IDs
-CAN_HOST_ID = 0x701          # PC sends commands to this ID
-CAN_BOOTLOADER_ID = 0x700    # Bootloader responds from this ID
+# CAN IDs - 29-bit Extended IDs
+CAN_HOST_ID = 0x18000701         # PC sends commands to this ID
+CAN_BOOTLOADER_ID = 0x18000700   # Bootloader responds from this ID
 
 # Commands
 CMD_ERASE_FLASH = 0x01
@@ -180,8 +180,8 @@ class CANBootloaderFlash:
         while len(msg_data) < 8:
             msg_data.append(0x00)
         
-        # Send to bootloader
-        return self.driver.send_message(CAN_HOST_ID, bytes(msg_data[:8]))
+        # Send to bootloader (use extended 29-bit ID)
+        return self.driver.send_message(CAN_HOST_ID, bytes(msg_data[:8]), is_extended=True)
     
     def wait_response(self, timeout: float = RESPONSE_TIMEOUT) -> Optional[CANMessage]:
         """

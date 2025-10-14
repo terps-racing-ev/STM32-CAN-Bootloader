@@ -62,12 +62,12 @@ void SystemInit(void) {
 
 ## CAN Protocol
 
-### CAN Message IDs (Actual CAN IDs)
+### CAN Message IDs (29-bit Extended IDs)
 
-| Direction          | CAN ID    | Description               |
-| ------------------ | --------- | ------------------------- |
-| Host → Bootloader | `0x701` | Commands from PC/Host     |
-| Bootloader → Host | `0x700` | Responses from Bootloader |
+| Direction          | CAN ID        | Description               |
+| ------------------ | ------------- | ------------------------- |
+| Host → Bootloader | `0x18000701` | Commands from PC/Host     |
+| Bootloader → Host | `0x18000700` | Responses from Bootloader |
 
 ### Command Codes (First byte)
 

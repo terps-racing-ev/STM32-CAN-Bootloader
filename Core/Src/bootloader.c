@@ -69,9 +69,9 @@ void Bootloader_Init(CAN_HandleTypeDef *hcan)
     }
     
     /* Configure TX header */
-    tx_header.StdId = CAN_BOOTLOADER_ID;
-    tx_header.ExtId = 0;
-    tx_header.IDE = CAN_ID_STD;
+    tx_header.StdId = 0;
+    tx_header.ExtId = CAN_BOOTLOADER_ID;
+    tx_header.IDE = CAN_ID_EXT;
     tx_header.RTR = CAN_RTR_DATA;
     tx_header.DLC = 8;
     tx_header.TransmitGlobalTime = DISABLE;
@@ -88,10 +88,11 @@ static void Bootloader_ConfigureCANFilter(void)
     can_filter.FilterBank = 0;
     can_filter.FilterMode = CAN_FILTERMODE_IDMASK;
     can_filter.FilterScale = CAN_FILTERSCALE_32BIT;
-    can_filter.FilterIdHigh = CAN_HOST_ID << 5;
-    can_filter.FilterIdLow = 0;
-    can_filter.FilterMaskIdHigh = 0xFFE0;  /* Match exact ID */
-    can_filter.FilterMaskIdLow = 0;
+    /* For extended IDs: bits [28:13] in FilterIdHigh, bits [12:0] + IDE in FilterIdLow */
+    can_filter.FilterIdHigh = (CAN_HOST_ID >> 13) & 0xFFFF;
+    can_filter.FilterIdLow = ((CAN_HOST_ID << 3) & 0xFFF8) | 0x0004;  /* IDE bit set */
+    can_filter.FilterMaskIdHigh = 0xFFFF;  /* Match all upper bits */
+    can_filter.FilterMaskIdLow = 0xFFFC;   /* Match lower bits + IDE */
     can_filter.FilterFIFOAssignment = CAN_RX_FIFO0;
     can_filter.FilterActivation = ENABLE;
     can_filter.SlaveStartFilterBank = 14;
