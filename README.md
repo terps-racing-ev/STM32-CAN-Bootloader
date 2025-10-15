@@ -8,7 +8,8 @@ A CAN-based bootloader for STM32L432 microcontrollers, designed for firmware upd
 ## Memory Layout
 
 - **Bootloader**: `0x08000000 - 0x08007FFF` (32KB)
-- **Application**: `0x08008000 - 0x0803FFFF` (224KB)
+- **Application**: `0x08008000 - 0x0803BFFF` (208KB)
+- **Permanent Storage**: `0x0803C000 - 0x0803FFFF` (16KB, reserved - never erased by bootloader)
 - **Valid Flag**: `0x08007FF8` (Application validity marker)
 
 ## Usage
@@ -30,7 +31,7 @@ Update your application's linker script (`.ld` file) to place code in the applic
 ```ld
 MEMORY
 {
-  FLASH (rx)  : ORIGIN = 0x08008000, LENGTH = 0x38000   /* 224KB app region */
+  FLASH (rx)  : ORIGIN = 0x08008000, LENGTH = 0x34000   /* 208KB app region */
   RAM   (xrw) : ORIGIN = 0x20000000, LENGTH = 0x00010000
 }
 

@@ -28,6 +28,7 @@ static uint32_t tx_mailbox;
 static uint8_t flash_buffer[8];     /* Buffer for 8-byte flash writes (two 4-byte chunks) */
 static uint16_t buffer_index = 0;   /* Current position in flash_buffer */
 static volatile uint8_t jump_to_app_flag = 0;  /* Flag to trigger jump from main loop */
+static volatile uint8_t can_command_received = 0;  /* Flag to disable auto-jump timeout */
 
 /* Private function prototypes -----------------------------------------------*/
 static void Bootloader_ConfigureCANFilter(void);
@@ -121,11 +122,13 @@ void Bootloader_Main(void)
     /* Main bootloader loop with timeout */
     while (1)
     {
-        /* Check for 5-second timeout to auto-jump to application */
-        if (!timeout_expired && (HAL_GetTick() - timeout_start >= BOOTLOADER_TIMEOUT_MS))
+        /* Check for timeout to auto-jump to application */
+        /* Only auto-jump if: timeout expired AND no CAN commands received AND valid app exists */
+        if (!timeout_expired && !can_command_received &&
+            (HAL_GetTick() - timeout_start >= BOOTLOADER_TIMEOUT_MS))
         {
             timeout_expired = 1;
-            
+
             /* Only jump if we have a valid application flag set */
             if (Bootloader_CheckApplicationValidFlag())
             {
@@ -134,11 +137,11 @@ void Bootloader_Main(void)
                 tx_data[1] = 0xAA;  /* Special: Timeout auto-jump */
                 tx_data[2] = 0x55;
                 Bootloader_SendCANMessage(RESP_READY, tx_data, 3);
-                
+
                 /* Wait for message to send */
                 Bootloader_WaitForCANTransmission();
                 HAL_Delay(10);
-                
+
                 /* Jump to application */
                 Bootloader_JumpToApplication();
             }
@@ -179,10 +182,13 @@ void Bootloader_ProcessCANMessage(void)
     uint32_t address;
     uint16_t length;
     uint8_t result;
-    
+
+    /* Mark that a CAN command has been received - disable auto-jump timeout */
+    can_command_received = 1;
+
     /* Get the command byte */
     command = rx_data[0];
-    
+
     switch (command)
     {
         case CMD_GET_STATUS:
@@ -220,11 +226,11 @@ void Bootloader_ProcessCANMessage(void)
             
         case CMD_SET_ADDRESS:
             /* Set the current write address */
-            address = (rx_data[1] << 24) | (rx_data[2] << 16) | 
+            address = (rx_data[1] << 24) | (rx_data[2] << 16) |
                      (rx_data[3] << 8) | rx_data[4];
-            
-            /* Validate address is in application area */
-            if (address >= APPLICATION_ADDRESS && address <= FLASH_END_ADDRESS)
+
+            /* Validate address is in application area (not in permanent storage) */
+            if (address >= APPLICATION_ADDRESS && address <= APPLICATION_END_ADDRESS)
             {
                 bootloader_status.current_address = address;
                 buffer_index = 0;  /* Reset buffer */
@@ -285,11 +291,12 @@ void Bootloader_ProcessCANMessage(void)
             
         case CMD_WRITE_FLASH:
             /* Legacy write command - write address and data in one message */
-            address = (rx_data[1] << 24) | (rx_data[2] << 16) | 
+            address = (rx_data[1] << 24) | (rx_data[2] << 16) |
                      (rx_data[3] << 8) | rx_data[4];
             length = rx_data[5];
-            
-            if (address >= APPLICATION_ADDRESS && address <= FLASH_END_ADDRESS)
+
+            /* Validate address is in application area (not in permanent storage) */
+            if (address >= APPLICATION_ADDRESS && address <= APPLICATION_END_ADDRESS)
             {
                 bootloader_status.state = BL_STATE_WRITING;
                 result = Bootloader_WriteFlash(address, &rx_data[6], length);
@@ -311,11 +318,12 @@ void Bootloader_ProcessCANMessage(void)
             
         case CMD_READ_FLASH:
             /* Read flash memory */
-            address = (rx_data[1] << 24) | (rx_data[2] << 16) | 
+            address = (rx_data[1] << 24) | (rx_data[2] << 16) |
                      (rx_data[3] << 8) | rx_data[4];
             length = rx_data[5];
-            
-            if (address >= APPLICATION_ADDRESS && address <= FLASH_END_ADDRESS && length <= 7)
+
+            /* Allow reading from application area only (not permanent storage during flash ops) */
+            if (address >= APPLICATION_ADDRESS && address <= APPLICATION_END_ADDRESS && length <= 7)
             {
                 bootloader_status.state = BL_STATE_READING;
                 tx_data[0] = RESP_DATA;
@@ -418,9 +426,16 @@ static uint8_t Bootloader_WriteFlash(uint32_t address, uint8_t *data, uint16_t l
     HAL_StatusTypeDef status = HAL_OK;
     uint32_t i;
     uint64_t data64;
-    
-    /* Validate parameters */
-    if (address < APPLICATION_ADDRESS || address > FLASH_END_ADDRESS)
+
+    /* Validate parameters - protect permanent storage area */
+    if (address < APPLICATION_ADDRESS || address > APPLICATION_END_ADDRESS)
+    {
+        bootloader_status.last_error = ERR_INVALID_ADDRESS;
+        return ERR_INVALID_ADDRESS;
+    }
+
+    /* Ensure write doesn't overflow into permanent storage */
+    if ((address + length - 1) > APPLICATION_END_ADDRESS)
     {
         bootloader_status.last_error = ERR_INVALID_ADDRESS;
         return ERR_INVALID_ADDRESS;
@@ -484,9 +499,15 @@ static uint8_t Bootloader_ReadFlash(uint32_t address, uint8_t *data, uint16_t le
 {
     uint16_t i;
     uint8_t *flash_ptr = (uint8_t *)address;
-    
-    /* Validate address */
-    if (address < APPLICATION_ADDRESS || address > FLASH_END_ADDRESS)
+
+    /* Validate address - protect permanent storage area */
+    if (address < APPLICATION_ADDRESS || address > APPLICATION_END_ADDRESS)
+    {
+        return ERR_INVALID_ADDRESS;
+    }
+
+    /* Ensure read doesn't overflow into permanent storage */
+    if ((address + length - 1) > APPLICATION_END_ADDRESS)
     {
         return ERR_INVALID_ADDRESS;
     }
@@ -774,8 +795,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         /* Get message from FIFO */
         if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, rx_data) == HAL_OK)
         {
-            /* Check if message is for bootloader */
-            if (rx_header.StdId == CAN_HOST_ID)
+            /* Check if message is for bootloader (using ExtId for 29-bit extended ID) */
+            if (rx_header.ExtId == CAN_HOST_ID && rx_header.IDE == CAN_ID_EXT)
             {
                 /* Process the message */
                 Bootloader_ProcessCANMessage();
