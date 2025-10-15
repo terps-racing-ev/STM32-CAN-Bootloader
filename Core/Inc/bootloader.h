@@ -28,8 +28,11 @@ extern "C" {
 /* Memory layout definitions */
 #define BOOTLOADER_SIZE             0x8000      /* 32KB for bootloader */
 #define APPLICATION_ADDRESS         0x08008000  /* Application starts at 32KB offset */
-#define FLASH_END_ADDRESS           0x0803FFFF  /* End of 256KB flash */
-#define APPLICATION_SIZE            (FLASH_END_ADDRESS - APPLICATION_ADDRESS + 1)
+#define PERMANENT_STORAGE_SIZE      0x4000      /* 16KB reserved for permanent data storage */
+#define PERMANENT_STORAGE_ADDRESS   0x0803C000  /* Last 16KB of flash (256KB - 16KB) */
+#define FLASH_END_ADDRESS           0x0803FFFF  /* Physical end of 256KB flash */
+#define APPLICATION_END_ADDRESS     (PERMANENT_STORAGE_ADDRESS - 1)  /* 0x0803BFFF */
+#define APPLICATION_SIZE            (APPLICATION_END_ADDRESS - APPLICATION_ADDRESS + 1)  /* 208KB */
 
 /* Application valid flag storage (last 8 bytes before application) */
 #define APP_VALID_FLAG_ADDRESS      0x08007FF8  /* Last 8 bytes of bootloader flash */

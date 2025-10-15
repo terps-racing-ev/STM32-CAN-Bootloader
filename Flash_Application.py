@@ -66,7 +66,7 @@ ERR_TIMEOUT = 0x07
 
 # Memory Configuration
 APP_START_ADDRESS = 0x08008000
-APP_MAX_SIZE = 224 * 1024  # 224 KB
+APP_MAX_SIZE = 208 * 1024  # 208 KB (last 16KB reserved for permanent storage)
 
 # Timing
 RESPONSE_TIMEOUT = 1.0       # Normal response timeout (seconds)
@@ -624,10 +624,17 @@ class CANBootloaderFlash:
         try:
             firmware_data = firmware_path.read_bytes()
             original_size = len(firmware_data)
-            
+
+            # Truncate to APP_MAX_SIZE if larger (last 16KB reserved for permanent storage)
+            if original_size > APP_MAX_SIZE:
+                print(f"⚠ Firmware size ({original_size} bytes) exceeds {APP_MAX_SIZE} bytes")
+                print(f"  Truncating to {APP_MAX_SIZE} bytes (last 16KB reserved for permanent storage)")
+                firmware_data = firmware_data[:APP_MAX_SIZE]
+                original_size = len(firmware_data)
+
             # Pad to 4-byte boundary (ensures 8-byte alignment)
             firmware_data = self.pad_to_4byte_boundary(firmware_data)
-            
+
             print(f"✓ Loaded {original_size} bytes ({original_size/1024:.2f} KB)")
             if len(firmware_data) != original_size:
                 print(f"  Padded to {len(firmware_data)} bytes (4-byte aligned)\n")
@@ -635,11 +642,6 @@ class CANBootloaderFlash:
                 print()
         except Exception as e:
             print(f"✗ Failed to read firmware file: {e}")
-            return False
-        
-        # Validate size
-        if len(firmware_data) > APP_MAX_SIZE:
-            print(f"✗ Firmware too large ({len(firmware_data)} bytes > {APP_MAX_SIZE} bytes)")
             return False
         
         # Get initial status
