@@ -6,27 +6,171 @@ Optimized for 4-byte chunks that align perfectly with STM32 flash requirements.
 Flash application firmware to STM32L432 via CAN bus and verify by reading back.
 
 Usage:
-    python Flash_Application.py application.bin [--channel USB1]
+    python Flash_Application.py application.bin [--adapter pcan] [--channel USB1]
+    python Flash_Application.py application.bin [--adapter canable] [--channel 0]
 
 Requirements:
-    - PCAN_Driver.py (PCAN driver module)
+    - PCAN_Driver.py or CANable_Driver.py (adapter driver modules)
     - python-can library
-    - PCAN-USB adapter
+    - PCAN-USB adapter or CANable adapter
 
 Author: GitHub Copilot
-Date: October 8, 2025
+Date: October 15, 2025
 """
 
 import sys
 import time
 import argparse
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 from dataclasses import dataclass
+from abc import ABC, abstractmethod
 
-# Import the PCAN driver
-from PCAN_Driver import PCANDriver, PCANChannel, PCANBaudRate, CANMessage
+# Import both drivers
+try:
+    from PCAN_Driver import PCANDriver, PCANChannel, PCANBaudRate, CANMessage as PCANMessage
+    PCAN_AVAILABLE = True
+except ImportError:
+    PCAN_AVAILABLE = False
+    print("Warning: PCAN_Driver not available")
 
+try:
+    from CANable_Driver import CANableDriver, CANableBaudRate, CANMessage as CANableMessage
+    CANABLE_AVAILABLE = True
+except ImportError:
+    CANABLE_AVAILABLE = False
+    print("Warning: CANable_Driver not available")
+
+
+
+# ============================================================================
+# Unified CAN Message Class
+# ============================================================================
+
+@dataclass
+class CANMessage:
+    """Unified CAN message class compatible with both drivers"""
+    id: int
+    data: bytes
+    timestamp: float = 0.0
+    is_extended: bool = False
+    is_remote: bool = False
+    is_error: bool = False
+    is_fd: bool = False
+    dlc: int = 0
+
+    def __post_init__(self):
+        if self.dlc == 0:
+            self.dlc = len(self.data)
+
+
+# ============================================================================
+# Abstract Driver Interface
+# ============================================================================
+
+class CANAdapter(ABC):
+    """Abstract base class for CAN adapters"""
+
+    @abstractmethod
+    def connect(self) -> bool:
+        """Connect to the CAN adapter"""
+        pass
+
+    @abstractmethod
+    def disconnect(self):
+        """Disconnect from the CAN adapter"""
+        pass
+
+    @abstractmethod
+    def send_message(self, can_id: int, data: bytes, is_extended: bool = False) -> bool:
+        """Send a CAN message"""
+        pass
+
+    @abstractmethod
+    def read_message(self, timeout: float = 1.0) -> Optional[CANMessage]:
+        """Read a CAN message"""
+        pass
+
+    @abstractmethod
+    def clear_receive_queue(self) -> bool:
+        """Clear the receive queue"""
+        pass
+
+
+class PCANAdapter(CANAdapter):
+    """Adapter wrapper for PCAN driver"""
+
+    def __init__(self, channel: str):
+        if not PCAN_AVAILABLE:
+            raise RuntimeError("PCAN driver not available")
+        self.driver = PCANDriver()
+        self.channel = PCANChannel[channel]
+
+    def connect(self) -> bool:
+        return self.driver.connect(self.channel, PCANBaudRate.BAUD_500K)
+
+    def disconnect(self):
+        self.driver.disconnect()
+
+    def send_message(self, can_id: int, data: bytes, is_extended: bool = False) -> bool:
+        return self.driver.send_message(can_id, data, is_extended)
+
+    def read_message(self, timeout: float = 1.0) -> Optional[CANMessage]:
+        msg = self.driver.read_message(timeout)
+        if msg is None:
+            return None
+        # Convert PCAN message to unified format
+        return CANMessage(
+            id=msg.id,
+            data=msg.data,
+            timestamp=msg.timestamp,
+            is_extended=msg.is_extended,
+            is_remote=msg.is_remote,
+            is_error=msg.is_error,
+            is_fd=msg.is_fd,
+            dlc=msg.dlc
+        )
+
+    def clear_receive_queue(self) -> bool:
+        return self.driver.clear_receive_queue()
+
+
+class CANableAdapter(CANAdapter):
+    """Adapter wrapper for CANable driver"""
+
+    def __init__(self, channel: int):
+        if not CANABLE_AVAILABLE:
+            raise RuntimeError("CANable driver not available")
+        self.driver = CANableDriver()
+        self.channel = channel
+
+    def connect(self) -> bool:
+        return self.driver.connect(self.channel, CANableBaudRate.BAUD_500K)
+
+    def disconnect(self):
+        self.driver.disconnect()
+
+    def send_message(self, can_id: int, data: bytes, is_extended: bool = False) -> bool:
+        return self.driver.send_message(can_id, data, is_extended)
+
+    def read_message(self, timeout: float = 1.0) -> Optional[CANMessage]:
+        msg = self.driver.read_message(timeout)
+        if msg is None:
+            return None
+        # Convert CANable message to unified format
+        return CANMessage(
+            id=msg.id,
+            data=msg.data,
+            timestamp=msg.timestamp,
+            is_extended=msg.is_extended,
+            is_remote=msg.is_remote,
+            is_error=msg.is_error,
+            is_fd=msg.is_fd,
+            dlc=msg.dlc
+        )
+
+    def clear_receive_queue(self) -> bool:
+        return self.driver.clear_receive_queue()
 
 
 # ============================================================================
@@ -116,50 +260,49 @@ class CANBootloaderFlash:
     """
     Main class for flashing firmware via CAN bootloader.
     """
-    
-    def __init__(self, pcan_channel: PCANChannel = PCANChannel.USB1):
+
+    def __init__(self, adapter: CANAdapter):
         """
         Initialize the CAN flasher.
-        
+
         Args:
-            pcan_channel: PCAN channel to use (default: USB1)
+            adapter: CAN adapter instance (PCANAdapter or CANableAdapter)
         """
-        self.driver = PCANDriver()
-        self.channel = pcan_channel
+        self.driver = adapter
         self.connected = False
         self.verbose = True
         
     def connect(self) -> bool:
         """
-        Connect to PCAN device and initialize CAN communication.
-        
+        Connect to CAN device and initialize CAN communication.
+
         Returns:
             True if connection successful
         """
         print(f"\n{'='*60}")
-        print("Connecting to PCAN device...")
+        print("Connecting to CAN device...")
         print(f"{'='*60}")
-        
-        # Connect to PCAN at 500 kbps (bootloader baud rate)
-        if not self.driver.connect(self.channel, PCANBaudRate.BAUD_500K):
-            print("✗ Failed to connect to PCAN device")
+
+        # Connect to CAN adapter at 500 kbps (bootloader baud rate)
+        if not self.driver.connect():
+            print("✗ Failed to connect to CAN device")
             return False
-        
+
         self.connected = True
-        
+
         # Clear receive queue
         self.driver.clear_receive_queue()
-        
+
         print("✓ Connected successfully")
-        
+
         # Wait for bootloader READY message
         self.wait_for_bootloader_ready()
-        
+
         print()
         return True
     
     def disconnect(self):
-        """Disconnect from PCAN device."""
+        """Disconnect from CAN device."""
         if self.connected:
             self.driver.disconnect()
             self.connected = False
@@ -678,7 +821,7 @@ class CANBootloaderFlash:
 
 def main():
     """Main entry point for the script."""
-    
+
     # Parse command line arguments
     parser = argparse.ArgumentParser(
         description='Flash firmware to STM32L432 via CAN bootloader',
@@ -686,17 +829,20 @@ def main():
         epilog='''
 Examples:
   python Flash_Application.py application.bin
-  python Flash_Application.py application.bin --channel USB1 --verify
+  python Flash_Application.py application.bin --adapter pcan --channel USB1
+  python Flash_Application.py application.bin --adapter canable --channel 0
   python Flash_Application.py application.bin --no-jump
   python Flash_Application.py application.bin --status-only
         '''
     )
-    
+
     parser.add_argument('firmware', type=str, nargs='?',
                        help='Path to firmware .bin file')
-    parser.add_argument('--channel', type=str, default='USB1',
-                       choices=[c.name for c in PCANChannel],
-                       help='PCAN channel (default: USB1)')
+    parser.add_argument('--adapter', type=str, default='pcan',
+                       choices=['pcan', 'canable'],
+                       help='CAN adapter type (default: pcan)')
+    parser.add_argument('--channel', type=str, default=None,
+                       help='Channel: For PCAN use USB1-USB16, for CANable use device index 0-N (default: USB1 for PCAN, 0 for CANable)')
     parser.add_argument('--verify', action='store_true', default=True,
                        help='Verify by reading back after flashing (default: enabled)')
     parser.add_argument('--no-verify', action='store_false', dest='verify',
@@ -708,33 +854,59 @@ Examples:
     parser.add_argument('--status-only', action='store_true',
                        help='Only get bootloader status and exit')
     parser.add_argument('--list-devices', action='store_true',
-                       help='List available PCAN devices and exit')
-    
+                       help='List available CAN devices and exit')
+
     args = parser.parse_args()
+
+    # Set default channel if not specified
+    if args.channel is None:
+        args.channel = 'USB1' if args.adapter == 'pcan' else '0'
     
     # Print banner
     print("\n" + "="*60)
     print("STM32L432 CAN Bootloader Flash Tool")
     print("="*60)
-    print(f"Version: 1.0")
-    print(f"Date: October 8, 2025")
+    print(f"Version: 2.0")
+    print(f"Date: October 15, 2025")
     print("="*60 + "\n")
-    
+
     # List devices if requested
     if args.list_devices:
-        driver = PCANDriver()
-        print("Scanning for PCAN devices...\n")
-        devices = driver.get_available_devices()
-        
-        if not devices:
-            print("✗ No PCAN devices found")
-            return 1
-        
-        print(f"Found {len(devices)} device(s):\n")
-        for dev in devices:
-            status = "OCCUPIED" if dev['occupied'] else "AVAILABLE"
-            print(f"  {dev['channel']:10s} : {status}")
-        
+        if args.adapter == 'pcan':
+            if not PCAN_AVAILABLE:
+                print("✗ PCAN driver not available. Install PCAN_Driver.py")
+                return 1
+            driver = PCANDriver()
+            print("Scanning for PCAN devices...\n")
+            devices = driver.get_available_devices()
+
+            if not devices:
+                print("✗ No PCAN devices found")
+                return 1
+
+            print(f"Found {len(devices)} device(s):\n")
+            for dev in devices:
+                status = "OCCUPIED" if dev['occupied'] else "AVAILABLE"
+                print(f"  {dev['channel']:10s} : {status}")
+
+        elif args.adapter == 'canable':
+            if not CANABLE_AVAILABLE:
+                print("✗ CANable driver not available. Install CANable_Driver.py")
+                return 1
+            driver = CANableDriver()
+            print("Scanning for CANable devices...\n")
+            devices = driver.get_available_devices()
+
+            if not devices:
+                print("✗ No CANable devices found")
+                return 1
+
+            print(f"Found {len(devices)} device(s):\n")
+            for dev in devices:
+                print(f"  [{dev['index']}] {dev['description']}")
+                print(f"      VID: 0x{dev['vid']:04X}, PID: 0x{dev['pid']:04X}")
+                print(f"      Serial: {dev['serial_number']}")
+
         print()
         return 0
     
@@ -742,30 +914,51 @@ Examples:
     if not args.status_only and not args.firmware:
         parser.print_help()
         return 1
-    
+
     if args.firmware:
         firmware_path = Path(args.firmware)
         if not firmware_path.exists():
             print(f"✗ Error: Firmware file not found: {firmware_path}")
             return 1
-    
+
+    # Create adapter instance based on selection
+    try:
+        if args.adapter == 'pcan':
+            if not PCAN_AVAILABLE:
+                print("✗ PCAN driver not available. Install PCAN_Driver.py and python-can")
+                return 1
+            adapter = PCANAdapter(args.channel)
+            adapter_name = f"PCAN {args.channel}"
+        elif args.adapter == 'canable':
+            if not CANABLE_AVAILABLE:
+                print("✗ CANable driver not available. Install CANable_Driver.py and python-can")
+                return 1
+            channel_index = int(args.channel)
+            adapter = CANableAdapter(channel_index)
+            adapter_name = f"CANable device {channel_index}"
+        else:
+            print(f"✗ Unknown adapter type: {args.adapter}")
+            return 1
+    except Exception as e:
+        print(f"✗ Failed to create adapter: {e}")
+        return 1
+
     # Create flasher instance
-    channel = PCANChannel[args.channel]
-    flasher = CANBootloaderFlash(channel)
+    flasher = CANBootloaderFlash(adapter)
     
     try:
-        # Connect to PCAN
+        # Connect to CAN adapter
         if not flasher.connect():
             return 1
-        
+
         # Status only mode
         if args.status_only:
             status = flasher.get_status()
             return 0 if status else 1
-        
+
         # Flash firmware
         print(f"Firmware file: {firmware_path}")
-        print(f"PCAN channel:  {args.channel}")
+        print(f"CAN adapter:   {adapter_name}")
         print(f"Read-back verify: {'Yes' if args.verify else 'No'}")
         print(f"Jump to app:   {'Yes' if args.jump else 'No'}")
         

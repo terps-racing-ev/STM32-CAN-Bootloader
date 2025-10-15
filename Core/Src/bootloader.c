@@ -795,8 +795,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
         /* Get message from FIFO */
         if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, rx_data) == HAL_OK)
         {
-            /* Check if message is for bootloader */
-            if (rx_header.StdId == CAN_HOST_ID)
+            /* Check if message is for bootloader (using ExtId for 29-bit extended ID) */
+            if (rx_header.ExtId == CAN_HOST_ID && rx_header.IDE == CAN_ID_EXT)
             {
                 /* Process the message */
                 Bootloader_ProcessCANMessage();
