@@ -29,6 +29,7 @@ static uint8_t flash_buffer[8];     /* Buffer for 8-byte flash writes (two 4-byt
 static uint16_t buffer_index = 0;   /* Current position in flash_buffer */
 static volatile uint8_t jump_to_app_flag = 0;  /* Flag to trigger jump from main loop */
 static volatile uint8_t can_command_received = 0;  /* Flag to disable auto-jump timeout */
+static uint32_t last_heartbeat_time = 0;  /* Last heartbeat timestamp for resetting on commands */
 
 /* Private function prototypes -----------------------------------------------*/
 static void Bootloader_ConfigureCANFilter(void);
@@ -111,7 +112,11 @@ static void Bootloader_ConfigureCANFilter(void)
 void Bootloader_Main(void)
 {
     uint32_t timeout_start = HAL_GetTick();
+    uint32_t last_heartbeat = HAL_GetTick();
     uint8_t timeout_expired = 0;
+    
+    /* Initialize the static heartbeat time variable */
+    last_heartbeat_time = last_heartbeat;
     
     /* Send ready message */
     tx_data[0] = RESP_READY;
@@ -122,6 +127,22 @@ void Bootloader_Main(void)
     /* Main bootloader loop with timeout */
     while (1)
     {
+        /* Update local heartbeat from static variable (may be reset by command processing) */
+        last_heartbeat = last_heartbeat_time;
+        
+        /* Send heartbeat message periodically only when idle */
+        if (bootloader_status.state == BL_STATE_IDLE && 
+            (HAL_GetTick() - last_heartbeat) >= HEARTBEAT_INTERVAL_MS)
+        {
+            /* Send ready/heartbeat message */
+            tx_data[0] = RESP_READY;
+            tx_data[1] = 0x01;  /* Bootloader version */
+            tx_data[2] = 0x00;  /* Bootloader subversion */
+            Bootloader_SendCANMessage(RESP_READY, tx_data, 3);
+            last_heartbeat = HAL_GetTick();
+            last_heartbeat_time = last_heartbeat;  /* Update static variable */
+        }
+        
         /* Check for timeout to auto-jump to application */
         /* Only auto-jump if: timeout expired AND no CAN commands received AND valid app exists */
         if (!timeout_expired && !can_command_received &&
@@ -182,9 +203,13 @@ void Bootloader_ProcessCANMessage(void)
     uint32_t address;
     uint16_t length;
     uint8_t result;
+    static uint32_t *last_heartbeat_ptr = NULL;
 
     /* Mark that a CAN command has been received - disable auto-jump timeout */
     can_command_received = 1;
+    
+    /* Reset heartbeat timer to prevent heartbeat from being sent immediately after command */
+    last_heartbeat_time = HAL_GetTick();
 
     /* Get the command byte */
     command = rx_data[0];

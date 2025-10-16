@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
   27:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****     (+) Each port bit of the general-purpose I/O (GPIO) ports can be individually
   28:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         configured by software in several modes:
   29:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         (++) Input mode
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 2
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 2
 
 
   30:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         (++) Analog mode
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
   84:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****     (#) To set/reset the level of a pin configured in output mode use
   85:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         HAL_GPIO_WritePin()/HAL_GPIO_TogglePin().
   86:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 3
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 3
 
 
   87:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****    (#) To lock pin configuration until next reset use HAL_GPIO_LockPin().
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  141:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****   * @{
  142:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****   */
  143:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 4
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 4
 
 
  144:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** /** @defgroup GPIO_Exported_Functions_Group1 Initialization/de-initialization functions
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  165:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****   uint32_t iocurrent;
   52              		.loc 1 165 12 is_stmt 0 view .LVU9
   53 0004 0023     		movs	r3, #0
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 5
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 5
 
 
   54              		.loc 1 175 9 view .LVU10
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  197:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         temp &= ~(GPIO_OTYPER_OT0 << position) ;
   87              		.loc 1 197 9 is_stmt 1 view .LVU26
   88              		.loc 1 197 14 is_stmt 0 view .LVU27
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 6
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 6
 
 
   89 001e 25EA0C05 		bic	r5, r5, ip
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  233:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         assert_param(IS_GPIO_AF(GPIO_Init->Alternate));
  108              		.loc 1 233 9 view .LVU36
  234:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 7
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 7
 
 
  235:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         /* Configure Alternate function mapped with the current IO */
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  257:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         temp |= (GPIO_GET_INDEX(GPIOx) << (4u * (position & 0x03u)));
  141              		.loc 1 257 18 discriminator 5 view .LVU51
  142 005c 0224     		movs	r4, #2
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 8
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 8
 
 
  143 005e 00E0     		b	.L7
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  185              		.loc 1 269 9 is_stmt 1 view .LVU69
  186              		.loc 1 269 14 is_stmt 0 view .LVU70
  187 008c ED68     		ldr	r5, [r5, #12]
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 9
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 9
 
 
  188              	.LVL19:
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  227 00b4 3B4D     		ldr	r5, .L21+4
  228 00b6 6E60     		str	r6, [r5, #4]
  285:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 10
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 10
 
 
  286:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         temp = EXTI->IMR1;
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  178:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** 
  268              		.loc 1 178 41 is_stmt 0 view .LVU107
  269 00d6 4FF0010C 		mov	ip, #1
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 11
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 11
 
 
  270 00da 0CFA03FC 		lsl	ip, ip, r3
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  306 00fe 4FF0030C 		mov	ip, #3
  307 0102 0CFA05FC 		lsl	ip, ip, r5
  223:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         temp |= ((GPIO_Init->Pull) << (position * 2U));
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 12
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 12
 
 
  308              		.loc 1 223 14 view .LVU126
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  245:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****       GPIOx->MODER = temp;
  346              		.loc 1 245 7 is_stmt 1 view .LVU143
  245:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****       GPIOx->MODER = temp;
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 13
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 13
 
 
  347              		.loc 1 245 26 is_stmt 0 view .LVU144
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  385 015c 4FEA930C 		lsr	ip, r3, #2
  255:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****         temp &= ~(0x0FuL << (4u * (position & 0x03u)));
  386              		.loc 1 255 14 view .LVU161
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 14
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 14
 
 
  387 0160 0CF10205 		add	r5, ip, #2
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  428              	.L22:
  429              		.align	2
  430              	.L21:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 15
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 15
 
 
  431 01a0 00000140 		.word	1073807360
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  465 0008 F0B5     		push	{r4, r5, r6, r7, lr}
  466              		.cfi_def_cfa_offset 20
  467              		.cfi_offset 4, -20
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 16
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 16
 
 
  468              		.cfi_offset 5, -16
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  494              		.loc 1 346 41 view .LVU191
  495 001e 4FF0030C 		mov	ip, #3
  496 0022 0CFA05FC 		lsl	ip, ip, r5
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 17
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 17
 
 
  497              		.loc 1 346 20 view .LVU192
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  364:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****     }
  365:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** 
  366:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****     position++;
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 18
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 18
 
 
  534              		.loc 1 366 5 is_stmt 1 view .LVU208
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  573              		.loc 1 330 7 is_stmt 1 view .LVU224
  330:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****       {
  574              		.loc 1 330 19 is_stmt 0 view .LVU225
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 19
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 19
 
 
  575 0092 B0F1904F 		cmp	r0, #1207959552
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  614              		.loc 1 338 9 is_stmt 1 view .LVU240
  338:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** 
  615              		.loc 1 338 13 is_stmt 0 view .LVU241
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 20
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 20
 
 
  616 00c8 A568     		ldr	r5, [r4, #8]
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  370:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** /**
  371:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****   * @}
  372:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****   */
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 21
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 21
 
 
  373:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** 
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  684              		.loc 1 406 15 view .LVU257
  685 000a 0020     		movs	r0, #0
  686              	.LVL62:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 22
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 22
 
 
  407:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****   }
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  714              		.loc 1 435 17 is_stmt 0 view .LVU266
  715 0002 8161     		str	r1, [r0, #24]
  716 0004 7047     		bx	lr
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 23
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 23
 
 
  717              	.L45:
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  748              		.loc 1 460 23 is_stmt 0 view .LVU276
  749 0002 01EA0302 		and	r2, r1, r3
  750              		.loc 1 460 59 view .LVU277
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 24
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 24
 
 
  751 0006 21EA0301 		bic	r1, r1, r3
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  482:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****   /* Apply lock key write sequence */
  483:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c ****   tmp |= GPIO_Pin;
  786              		.loc 1 483 3 view .LVU287
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 25
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 25
 
 
  787              		.loc 1 483 7 is_stmt 0 view .LVU288
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  822 0028 7047     		bx	lr
  823              	.LVL69:
  824              	.L50:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 26
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 26
 
 
  825              		.cfi_restore_state
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  532:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_gpio.c **** }
  850              		.loc 1 532 1 is_stmt 0 view .LVU307
  851 0000 7047     		bx	lr
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 27
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 27
 
 
  852              		.cfi_endproc
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  899              		.cfi_endproc
  900              	.LFE138:
  902              		.text
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 28
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 28
 
 
  903              	.Letext0:
@@ -1627,29 +1627,29 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 1
  906              		.file 4 "Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l432xx.h"
  907              		.file 5 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_def.h"
  908              		.file 6 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_gpio.h"
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s 			page 29
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s 			page 29
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32l4xx_hal_gpio.c
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:21     .text.HAL_GPIO_Init:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:27     .text.HAL_GPIO_Init:00000000 HAL_GPIO_Init
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:431    .text.HAL_GPIO_Init:000001a0 $d
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:439    .text.HAL_GPIO_DeInit:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:445    .text.HAL_GPIO_DeInit:00000000 HAL_GPIO_DeInit
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:648    .text.HAL_GPIO_DeInit:000000e8 $d
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:655    .text.HAL_GPIO_ReadPin:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:661    .text.HAL_GPIO_ReadPin:00000000 HAL_GPIO_ReadPin
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:694    .text.HAL_GPIO_WritePin:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:700    .text.HAL_GPIO_WritePin:00000000 HAL_GPIO_WritePin
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:727    .text.HAL_GPIO_TogglePin:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:733    .text.HAL_GPIO_TogglePin:00000000 HAL_GPIO_TogglePin
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:763    .text.HAL_GPIO_LockPin:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:769    .text.HAL_GPIO_LockPin:00000000 HAL_GPIO_LockPin
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:835    .text.HAL_GPIO_EXTI_Callback:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:841    .text.HAL_GPIO_EXTI_Callback:00000000 HAL_GPIO_EXTI_Callback
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:856    .text.HAL_GPIO_EXTI_IRQHandler:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:862    .text.HAL_GPIO_EXTI_IRQHandler:00000000 HAL_GPIO_EXTI_IRQHandler
-C:\Users\Ali\AppData\Local\Temp\ccFJBblh.s:898    .text.HAL_GPIO_EXTI_IRQHandler:00000018 $d
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:21     .text.HAL_GPIO_Init:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:27     .text.HAL_GPIO_Init:00000000 HAL_GPIO_Init
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:431    .text.HAL_GPIO_Init:000001a0 $d
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:439    .text.HAL_GPIO_DeInit:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:445    .text.HAL_GPIO_DeInit:00000000 HAL_GPIO_DeInit
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:648    .text.HAL_GPIO_DeInit:000000e8 $d
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:655    .text.HAL_GPIO_ReadPin:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:661    .text.HAL_GPIO_ReadPin:00000000 HAL_GPIO_ReadPin
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:694    .text.HAL_GPIO_WritePin:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:700    .text.HAL_GPIO_WritePin:00000000 HAL_GPIO_WritePin
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:727    .text.HAL_GPIO_TogglePin:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:733    .text.HAL_GPIO_TogglePin:00000000 HAL_GPIO_TogglePin
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:763    .text.HAL_GPIO_LockPin:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:769    .text.HAL_GPIO_LockPin:00000000 HAL_GPIO_LockPin
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:835    .text.HAL_GPIO_EXTI_Callback:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:841    .text.HAL_GPIO_EXTI_Callback:00000000 HAL_GPIO_EXTI_Callback
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:856    .text.HAL_GPIO_EXTI_IRQHandler:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:862    .text.HAL_GPIO_EXTI_IRQHandler:00000000 HAL_GPIO_EXTI_IRQHandler
+C:\Users\Ali\AppData\Local\Temp\ccAtQCvD.s:898    .text.HAL_GPIO_EXTI_IRQHandler:00000018 $d
 
 NO UNDEFINED SYMBOLS
