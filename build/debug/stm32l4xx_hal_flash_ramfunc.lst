@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s 			page 1
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s 			page 1
   28:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c **** 
   29:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c ****     *** GNU Compiler ***
   30:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c ****     --------------------
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s 			page 2
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s 			page 2
 
 
   31:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c ****     [..] RAM functions are defined using a specific toolchain attribute
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s 			page 1
   85:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c **** 
   86:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c **** /**
   87:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c ****   * @brief   Enable the Power down in Run Mode
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s 			page 3
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s 			page 3
 
 
   88:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c ****   * @note    This function should be called and executed from SRAM memory
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s 			page 1
  105:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c **** __RAM_FUNC HAL_StatusTypeDef HAL_FLASHEx_DisableRunPowerDown(void)
  106:Drivers/STM32L4xx_HAL_Driver/Src/stm32l4xx_hal_flash_ramfunc.c **** {
   68              		.loc 1 106 1 is_stmt 1 view -0
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s 			page 4
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s 			page 4
 
 
   69              		.cfi_startproc
@@ -221,16 +221,16 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s 			page 1
  102              		.file 3 "C:/Users/Ali/AppData/Roaming/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tool
  103              		.file 4 "Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l432xx.h"
  104              		.file 5 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_def.h"
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s 			page 5
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s 			page 5
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 stm32l4xx_hal_flash_ramfunc.c
-C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s:21     .RamFunc:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s:27     .RamFunc:00000000 HAL_FLASHEx_EnableRunPowerDown
-C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s:54     .RamFunc:00000018 $d
-C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s:60     .RamFunc:00000024 $t
-C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s:66     .RamFunc:00000024 HAL_FLASHEx_DisableRunPowerDown
-C:\Users\Ali\AppData\Local\Temp\cc5438Tf.s:93     .RamFunc:0000003c $d
+C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s:21     .RamFunc:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s:27     .RamFunc:00000000 HAL_FLASHEx_EnableRunPowerDown
+C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s:54     .RamFunc:00000018 $d
+C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s:60     .RamFunc:00000024 $t
+C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s:66     .RamFunc:00000024 HAL_FLASHEx_DisableRunPowerDown
+C:\Users\Ali\AppData\Local\Temp\ccqyKpsB.s:93     .RamFunc:0000003c $d
 
 NO UNDEFINED SYMBOLS

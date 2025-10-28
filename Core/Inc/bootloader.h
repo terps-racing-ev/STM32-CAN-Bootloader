@@ -42,6 +42,9 @@ extern "C" {
 /* Bootloader timeout */
 #define BOOTLOADER_TIMEOUT_MS       10000        /* 5 second timeout */
 
+/* Heartbeat interval */
+#define HEARTBEAT_INTERVAL_MS       1000         /* 1 second heartbeat interval */
+
 /* Flash operation definitions */
 /* Note: FLASH_PAGE_SIZE already defined in stm32l4xx_hal_flash.h */
 #define FLASH_TIMEOUT               50000       /* Flash operation timeout */
