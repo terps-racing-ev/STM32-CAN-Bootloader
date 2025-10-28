@@ -735,12 +735,12 @@ uint8_t Bootloader_SetApplicationValidFlag(void)
     /* Unlock flash */
     HAL_FLASH_Unlock();
     
-    /* Erase the page containing the flag (Page 63 - last page before application) */
+    /* Erase the page containing the flag (Page 15 - last page of bootloader) */
     FLASH_EraseInitTypeDef erase_init;
     uint32_t page_error;
     
     erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
-    erase_init.Page = 63;  /* Last page of bootloader area (32KB / 2KB per page = page 0-15, but flag is at end) */
+    erase_init.Page = 15;  /* Last page of bootloader area (32KB / 2KB per page = pages 0-15) */
     erase_init.NbPages = 1;
     
     status = HAL_FLASHEx_Erase(&erase_init, &page_error);
@@ -799,7 +799,7 @@ void Bootloader_ClearApplicationValidFlag(void)
     
     /* Erase the page containing the flag */
     erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
-    erase_init.Page = 63;  /* Last page of bootloader area */
+    erase_init.Page = 15;  /* Last page of bootloader area (32KB / 2KB per page = pages 0-15) */
     erase_init.NbPages = 1;
     
     status = HAL_FLASHEx_Erase(&erase_init, &page_error);
