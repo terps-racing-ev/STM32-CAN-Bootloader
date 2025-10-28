@@ -10,6 +10,12 @@
   * Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.
   *
+  * Debug LED Indicators:
+  * - LED1 (PB1): Bootloader Running - Always ON when bootloader is active
+  * - LED2 (PA8): Valid Application - ON if valid app exists, OFF if no app
+  * - LED3 (PB5): CAN Activity - Turns ON when any CAN message received from host
+  *               Blinks 20 times rapidly before jumping to application
+  *
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -110,6 +116,14 @@ void Bootloader_SendCANMessage(uint8_t cmd, uint8_t *data, uint8_t length);
 uint8_t Bootloader_SetApplicationValidFlag(void);
 uint8_t Bootloader_CheckApplicationValidFlag(void);
 void Bootloader_ClearApplicationValidFlag(void);
+
+/* LED control functions */
+void Bootloader_LED_Init(void);
+void Bootloader_LED_UpdateStatus(void);
+void Bootloader_LED_FlashingStart(void);
+void Bootloader_LED_FlashingStop(void);
+void Bootloader_LED_FlashingUpdate(void);
+void Bootloader_LED_BlinkBeforeJump(void);
 
 #ifdef __cplusplus
 }

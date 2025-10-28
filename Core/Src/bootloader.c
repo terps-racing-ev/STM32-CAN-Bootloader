@@ -77,6 +77,12 @@ void Bootloader_Init(CAN_HandleTypeDef *hcan)
     tx_header.RTR = CAN_RTR_DATA;
     tx_header.DLC = 8;
     tx_header.TransmitGlobalTime = DISABLE;
+    
+    /* Initialize LED debug indicators */
+    Bootloader_LED_Init();
+    
+    /* Update LED status to show application validity */
+    Bootloader_LED_UpdateStatus();
 }
 
 /**
@@ -163,6 +169,9 @@ void Bootloader_Main(void)
                 Bootloader_WaitForCANTransmission();
                 HAL_Delay(10);
 
+                /* Blink LEDs 5 times rapidly before jumping */
+                Bootloader_LED_BlinkBeforeJump();
+
                 /* Jump to application */
                 Bootloader_JumpToApplication();
             }
@@ -180,6 +189,9 @@ void Bootloader_Main(void)
             
             /* Wait for this message to be sent */
             Bootloader_WaitForCANTransmission();
+            
+            /* Blink LEDs 5 times rapidly before jumping */
+            Bootloader_LED_BlinkBeforeJump();
             
             /* Jump to application (this function should not return) */
             Bootloader_JumpToApplication();
@@ -203,10 +215,12 @@ void Bootloader_ProcessCANMessage(void)
     uint32_t address;
     uint16_t length;
     uint8_t result;
-    static uint32_t *last_heartbeat_ptr = NULL;
 
     /* Mark that a CAN command has been received - disable auto-jump timeout */
     can_command_received = 1;
+    
+    /* Turn on LED3 to indicate CAN activity from host */
+    LED3_ON();
     
     /* Reset heartbeat timer to prevent heartbeat from being sent immediately after command */
     last_heartbeat_time = HAL_GetTick();
@@ -234,6 +248,9 @@ void Bootloader_ProcessCANMessage(void)
             
             /* Clear the application valid flag first */
             Bootloader_ClearApplicationValidFlag();
+            
+            /* Update LED2 since we cleared the valid flag */
+            Bootloader_LED_UpdateStatus();
             
             result = Bootloader_EraseApplicationFlash();
             if (result == ERR_NONE)
@@ -381,6 +398,9 @@ void Bootloader_ProcessCANMessage(void)
                     bootloader_status.last_error = result;
                 }
                 
+                /* Update LED2 to show valid application */
+                Bootloader_LED_UpdateStatus();
+                
                 Bootloader_SendACK();
                 jump_to_app_flag = 1;  /* Set flag to trigger jump from main loop */
             }
@@ -417,23 +437,28 @@ static uint8_t Bootloader_EraseApplicationFlash(void)
     /* Clear all flash flags */
     __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
     
-    /* Configure erase */
-    erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
-    erase_init.Banks = FLASH_BANK_1;
-    erase_init.Page = first_page;
-    erase_init.NbPages = num_pages;
-    
-    /* Perform erase */
-    status = HAL_FLASHEx_Erase(&erase_init, &page_error);
+    /* Erase pages one at a time for better responsiveness */
+    for (uint32_t page = 0; page < num_pages; page++)
+    {
+        /* Configure erase for single page */
+        erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
+        erase_init.Banks = FLASH_BANK_1;
+        erase_init.Page = first_page + page;
+        erase_init.NbPages = 1;
+        
+        /* Perform erase */
+        status = HAL_FLASHEx_Erase(&erase_init, &page_error);
+        
+        if (status != HAL_OK)
+        {
+            HAL_FLASH_Lock();
+            bootloader_status.last_error = ERR_FLASH_ERASE_FAILED;
+            return ERR_FLASH_ERASE_FAILED;
+        }
+    }
     
     /* Lock flash */
     HAL_FLASH_Lock();
-    
-    if (status != HAL_OK)
-    {
-        bootloader_status.last_error = ERR_FLASH_ERASE_FAILED;
-        return ERR_FLASH_ERASE_FAILED;
-    }
     
     bootloader_status.last_error = ERR_NONE;
     return ERR_NONE;
@@ -727,7 +752,6 @@ uint8_t Bootloader_SetApplicationValidFlag(void)
 {
     HAL_StatusTypeDef status;
     uint32_t magic_data[2];
-    uint64_t data_to_write;
     
     magic_data[0] = APP_VALID_MAGIC_NUMBER;
     magic_data[1] = APP_VALID_FLAG_COMPLEMENT;
@@ -790,7 +814,6 @@ uint8_t Bootloader_CheckApplicationValidFlag(void)
   */
 void Bootloader_ClearApplicationValidFlag(void)
 {
-    HAL_StatusTypeDef status;
     FLASH_EraseInitTypeDef erase_init;
     uint32_t page_error;
     
@@ -802,10 +825,97 @@ void Bootloader_ClearApplicationValidFlag(void)
     erase_init.Page = 15;  /* Last page of bootloader area (32KB / 2KB per page = pages 0-15) */
     erase_init.NbPages = 1;
     
-    status = HAL_FLASHEx_Erase(&erase_init, &page_error);
+    HAL_FLASHEx_Erase(&erase_init, &page_error);
     
     /* Lock flash */
     HAL_FLASH_Lock();
+}
+
+/**
+  * @brief  Initialize LED debug indicators
+  * @retval None
+  */
+void Bootloader_LED_Init(void)
+{
+    /* Turn on LED1 to indicate bootloader is running */
+    LED1_ON();
+    
+    /* LED2 and LED3 start off */
+    LED2_OFF();
+    LED3_OFF();
+}
+
+/**
+  * @brief  Update LED2 based on valid application status
+  * @retval None
+  */
+void Bootloader_LED_UpdateStatus(void)
+{
+    /* LED2 indicates if valid application exists */
+    if (Bootloader_CheckApplicationValidFlag())
+    {
+        LED2_ON();
+    }
+    else
+    {
+        LED2_OFF();
+    }
+}
+
+/**
+  * @brief  Not used - kept for compatibility
+  * @retval None
+  */
+void Bootloader_LED_FlashingStart(void)
+{
+    /* No-op: LED3 is controlled directly in ProcessCANMessage */
+}
+
+/**
+  * @brief  Not used - kept for compatibility
+  * @retval None
+  */
+void Bootloader_LED_FlashingStop(void)
+{
+    /* No-op: LED3 stays on once CAN activity detected */
+}
+
+/**
+  * @brief  Not used - kept for compatibility
+  * @retval None
+  */
+void Bootloader_LED_FlashingUpdate(void)
+{
+    /* No-op: LED3 is controlled directly, no updates needed */
+}
+
+/**
+  * @brief  Blink all LEDs rapidly 20 times before jumping to application
+  * @retval None
+  */
+void Bootloader_LED_BlinkBeforeJump(void)
+{
+    for (uint8_t i = 0; i < 20; i++)
+    {
+        LED1_OFF();
+        HAL_Delay(5);
+        LED2_ON();
+        HAL_Delay(10);
+        LED3_OFF();
+        HAL_Delay(15); 
+        
+        LED1_ON();
+        HAL_Delay(15);
+        LED2_OFF();
+        HAL_Delay(10);
+        LED3_ON();
+        HAL_Delay(5); 
+    }
+    
+    /* Turn all LEDs off before jumping */
+    LED1_OFF();
+    LED2_OFF();
+    LED3_OFF();
 }
 
 /**

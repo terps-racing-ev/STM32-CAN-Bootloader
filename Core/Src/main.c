@@ -198,14 +198,38 @@ static void MX_CAN1_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  
   /* USER CODE BEGIN MX_GPIO_Init_1 */
 
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
+  
+  /* Configure LED pins as output push-pull */
+  /* LED1 - PB1 */
+  GPIO_InitStruct.Pin = LED1_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED1_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* LED2 - PA8 */
+  GPIO_InitStruct.Pin = LED2_PIN;
+  HAL_GPIO_Init(LED2_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* LED3 - PB4 */
+  GPIO_InitStruct.Pin = LED3_PIN;
+  HAL_GPIO_Init(LED3_GPIO_PORT, &GPIO_InitStruct);
+  
+  /* Initialize all LEDs to OFF */
+  LED1_OFF();
+  LED2_OFF();
+  LED3_OFF();
 
   /* USER CODE END MX_GPIO_Init_2 */
 }
