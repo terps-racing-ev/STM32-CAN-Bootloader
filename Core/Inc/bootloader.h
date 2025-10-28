@@ -40,7 +40,7 @@ extern "C" {
 #define APP_VALID_FLAG_COMPLEMENT   0x21524110  /* Bitwise NOT of magic number */
 
 /* Bootloader timeout */
-#define BOOTLOADER_TIMEOUT_MS       5000        /* 5 second timeout */
+#define BOOTLOADER_TIMEOUT_MS       1000        /* 1 second timeout */
 
 /* Heartbeat interval */
 #define HEARTBEAT_INTERVAL_MS       1000         /* 1 second heartbeat interval */
