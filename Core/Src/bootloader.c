@@ -113,6 +113,7 @@ void Bootloader_Main(void)
 {
     uint32_t timeout_start = HAL_GetTick();
     uint32_t last_heartbeat = HAL_GetTick();
+    uint32_t last_led_toggle = HAL_GetTick();
     uint8_t timeout_expired = 0;
     
     /* Initialize the static heartbeat time variable */
@@ -127,6 +128,13 @@ void Bootloader_Main(void)
     /* Main bootloader loop with timeout */
     while (1)
     {
+        /* Rapid LED flash to indicate bootloader mode (100ms toggle = 5Hz blink) */
+        if ((HAL_GetTick() - last_led_toggle) >= 100)
+        {
+            HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
+            last_led_toggle = HAL_GetTick();
+        }
+        
         /* Update local heartbeat from static variable (may be reset by command processing) */
         last_heartbeat = last_heartbeat_time;
         
@@ -576,6 +584,10 @@ uint8_t Bootloader_CheckValidApplication(void)
   */
 static void Bootloader_DeInit(void)
 {
+    /* Turn off and de-initialize LED */
+    HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
+    HAL_GPIO_DeInit(LED_PORT, LED_PIN);
+    
     /* Disable CAN */
     HAL_CAN_DeactivateNotification(hcan_bootloader, CAN_IT_RX_FIFO0_MSG_PENDING);
     HAL_CAN_Stop(hcan_bootloader);
@@ -591,6 +603,7 @@ static void Bootloader_DeInit(void)
     
     /* Disable all peripheral clocks */
     __HAL_RCC_GPIOA_CLK_DISABLE();
+    __HAL_RCC_GPIOB_CLK_DISABLE();
     __HAL_RCC_CAN1_CLK_DISABLE();
 }
 
