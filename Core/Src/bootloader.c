@@ -753,7 +753,7 @@ uint8_t Bootloader_SetApplicationValidFlag(void)
     uint32_t page_error;
     
     erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
-    erase_init.Page = 63;  /* Last page of bootloader area (32KB / 2KB per page = page 0-15, but flag is at end) */
+    erase_init.Page = (APP_VALID_FLAG_ADDRESS - 0x08000000) / FLASH_PAGE_SIZE;  /* Page 15: contains APP_VALID_FLAG_ADDRESS (0x08007FF8) */
     erase_init.NbPages = 1;
     
     status = HAL_FLASHEx_Erase(&erase_init, &page_error);
@@ -812,7 +812,7 @@ void Bootloader_ClearApplicationValidFlag(void)
     
     /* Erase the page containing the flag */
     erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
-    erase_init.Page = 63;  /* Last page of bootloader area */
+    erase_init.Page = (APP_VALID_FLAG_ADDRESS - 0x08000000) / FLASH_PAGE_SIZE;  /* Page 15: contains APP_VALID_FLAG_ADDRESS */
     erase_init.NbPages = 1;
     
     status = HAL_FLASHEx_Erase(&erase_init, &page_error);
