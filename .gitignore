@@ -5,10 +5,17 @@
 *.o
 *.ko
 *.obj
-*.elf
-*.vscode/
+
+# Build output
 build/
+
+# VS Code
+.vscode/
+
+# Python
 __pycache__/
+*.pyc
+*.pyo
 
 # Linker output
 *.ilk
@@ -44,15 +51,26 @@ __pycache__/
 *.su
 *.idb
 *.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-# debug information files
 *.dwo
+
+# STM32 / ARM specific
+*.lst
+*.lss
+*.sym
+*.srec
+*.s19
+
+# STM32CubeIDE / STM32CubeMX
+.settings/
+.project
+.cproject
+.mxproject
+Debug/
+Release/
+*.launch
+*.cfg
+!openocd.cfg
+
+# Backup files
+*.bak
+*~

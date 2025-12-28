@@ -31,6 +31,11 @@ extern "C" {
 #include "main.h"
 
 /* Exported defines ----------------------------------------------------------*/
+
+/* LED Pin Definitions - Onboard LED at PB3 */
+#define LED_PORT                    GPIOB
+#define LED_PIN                     GPIO_PIN_3
+
 /* Memory layout definitions */
 #define BOOTLOADER_SIZE             0x8000      /* 32KB for bootloader */
 #define APPLICATION_ADDRESS         0x08008000  /* Application starts at 32KB offset */
@@ -46,7 +51,7 @@ extern "C" {
 #define APP_VALID_FLAG_COMPLEMENT   0x21524110  /* Bitwise NOT of magic number */
 
 /* Bootloader timeout */
-#define BOOTLOADER_TIMEOUT_MS       1000        /* 1 second timeout */
+#define BOOTLOADER_TIMEOUT_MS       1000        /* 5 second timeout */
 
 /* Heartbeat interval */
 #define HEARTBEAT_INTERVAL_MS       1000         /* 1 second heartbeat interval */

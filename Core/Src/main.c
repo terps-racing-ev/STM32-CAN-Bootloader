@@ -209,28 +209,15 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* Enable GPIOB clock for onboard LED at PB3 */
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   
-  /* Configure LED pins as output push-pull */
-  /* LED1 - PB1 */
-  GPIO_InitStruct.Pin = LED1_PIN;
+  /* Initialize LED pin (PB3) */
+  GPIO_InitStruct.Pin = LED_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED1_GPIO_PORT, &GPIO_InitStruct);
-  
-  /* LED2 - PA8 */
-  GPIO_InitStruct.Pin = LED2_PIN;
-  HAL_GPIO_Init(LED2_GPIO_PORT, &GPIO_InitStruct);
-  
-  /* LED3 - PB4 */
-  GPIO_InitStruct.Pin = LED3_PIN;
-  HAL_GPIO_Init(LED3_GPIO_PORT, &GPIO_InitStruct);
-  
-  /* Initialize all LEDs to OFF */
-  LED1_OFF();
-  LED2_OFF();
-  LED3_OFF();
-
+  HAL_GPIO_Init(LED_PORT, &GPIO_InitStruct);
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
