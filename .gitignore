@@ -11,6 +11,7 @@ build/
 
 # VS Code
 .vscode/
+.stm32env
 
 # Python
 __pycache__/

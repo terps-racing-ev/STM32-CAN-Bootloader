@@ -7,6 +7,34 @@ A CAN-based bootloader for STM32L432 microcontrollers, designed for firmware upd
 
 ## Memory Layout
 
+```
+    STM32L432 Flash (256KB)
+    ┌───────────────────────────────────┐ 0x0803FFFF
+    │                                   │
+    │       Permanent Storage           │
+    │     (16KB - never erased)         │
+    │                                   │
+    ├───────────────────────────────────┤ 0x0803C000
+    │                                   │
+    │                                   │
+    │                                   │
+    │                                   │
+    │                                   │
+    │         Application               │
+    │          (208KB)                  │
+    │                                   │
+    │                                   │
+    │                                   │
+    │                                   │
+    │                                   │
+    ├───────────────────────────────────┤ 0x08008000
+    │           Bootloader              │
+    │            (32KB)                 │
+    │  ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄  │
+    │  Valid Flag @ 0x08007FF8 (8B)     │
+    └───────────────────────────────────┘ 0x08000000
+```
+
 - **Bootloader**: `0x08000000 - 0x08007FFF` (32KB)
 - **Application**: `0x08008000 - 0x0803BFFF` (208KB)
 - **Permanent Storage**: `0x0803C000 - 0x0803FFFF` (16KB, reserved - never erased by bootloader)

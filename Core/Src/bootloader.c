@@ -96,11 +96,12 @@ static void Bootloader_ConfigureCANFilter(void)
     can_filter.FilterBank = 0;
     can_filter.FilterMode = CAN_FILTERMODE_IDMASK;
     can_filter.FilterScale = CAN_FILTERSCALE_32BIT;
-    /* For extended IDs: bits [28:13] in FilterIdHigh, bits [12:0] + IDE in FilterIdLow */
-    can_filter.FilterIdHigh = (CAN_HOST_ID >> 13) & 0xFFFF;
-    can_filter.FilterIdLow = ((CAN_HOST_ID << 3) & 0xFFF8) | 0x0004;  /* IDE bit set */
-    can_filter.FilterMaskIdHigh = 0xFFFF;  /* Match all upper bits */
-    can_filter.FilterMaskIdLow = 0xFFFC;   /* Match lower bits + IDE */
+    
+    /* Accept ALL extended IDs for debugging - we'll check ID in callback */
+    can_filter.FilterIdHigh = 0x0000;
+    can_filter.FilterIdLow = 0x0004;   /* IDE bit set (extended ID only) */
+    can_filter.FilterMaskIdHigh = 0x0000;  /* Don't care about ID bits */
+    can_filter.FilterMaskIdLow = 0x0004;   /* Only check IDE bit */
     can_filter.FilterFIFOAssignment = CAN_RX_FIFO0;
     can_filter.FilterActivation = ENABLE;
     can_filter.SlaveStartFilterBank = 14;
