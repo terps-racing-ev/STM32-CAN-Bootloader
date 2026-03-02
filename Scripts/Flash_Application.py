@@ -6,8 +6,8 @@ Optimized for 4-byte chunks that align perfectly with STM32 flash requirements.
 Flash application firmware to STM32L432 via CAN bus and verify by reading back.
 
 Usage:
-    python Flash_Application.py application.bin [--adapter pcan] [--channel USB1]
-    python Flash_Application.py application.bin [--adapter canable] [--channel 0]
+    python Scripts/Flash_Application.py application.bin [--adapter pcan] [--channel USB1]
+    python Scripts/Flash_Application.py application.bin [--adapter canable] [--channel 0]
 
 Requirements:
     - PCAN_Driver.py or CANable_Driver.py (adapter driver modules)
@@ -975,11 +975,11 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-  python Flash_Application.py application.bin
-  python Flash_Application.py application.bin --adapter pcan --channel USB1
-  python Flash_Application.py application.bin --adapter canable --channel 0
-  python Flash_Application.py application.bin --no-jump
-  python Flash_Application.py application.bin --status-only
+    python Scripts/Flash_Application.py application.bin
+    python Scripts/Flash_Application.py application.bin --adapter pcan --channel USB1
+    python Scripts/Flash_Application.py application.bin --adapter canable --channel 0
+    python Scripts/Flash_Application.py application.bin --no-jump
+    python Scripts/Flash_Application.py application.bin --status-only
         '''
     )
 

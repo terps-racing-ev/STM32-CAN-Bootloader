@@ -42,7 +42,13 @@ A CAN-based bootloader for STM32L432 microcontrollers, designed for firmware upd
 
 ## Usage
 
-Use the `Flash_Application.py` script to flash firmware to the device over CAN bus using a PCAN-USB adapter.
+Use the `Scripts/Flash_Application.py` script to flash firmware to the device over CAN bus using a PCAN-USB adapter.
+
+Example:
+
+```bash
+python Scripts/Flash_Application.py application.bin --adapter pcan --channel USB1
+```
 
 Your application should be a *.bin file with the correct changes to its memory locations. (see below)
 
