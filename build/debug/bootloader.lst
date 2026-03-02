@@ -1,4 +1,4 @@
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 1
 
 
    1              		.cpu cortex-m4
@@ -58,7 +58,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
   28:Core/Src/bootloader.c **** static uint8_t flash_buffer[8];     /* Buffer for 8-byte flash writes (two 4-byte chunks) */
   29:Core/Src/bootloader.c **** static uint16_t buffer_index = 0;   /* Current position in flash_buffer */
   30:Core/Src/bootloader.c **** static volatile uint8_t jump_to_app_flag = 0;  /* Flag to trigger jump from main loop */
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 2
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 2
 
 
   31:Core/Src/bootloader.c **** static volatile uint8_t can_command_received = 0;  /* Flag to disable auto-jump timeout */
@@ -118,7 +118,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
   85:Core/Src/bootloader.c ****     Bootloader_LED_UpdateStatus();
   86:Core/Src/bootloader.c **** }
   87:Core/Src/bootloader.c **** 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 3
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 3
 
 
   88:Core/Src/bootloader.c **** /**
@@ -178,7 +178,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  142:Core/Src/bootloader.c ****             last_led_toggle = HAL_GetTick();
  143:Core/Src/bootloader.c ****         }
  144:Core/Src/bootloader.c ****         
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 4
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 4
 
 
  145:Core/Src/bootloader.c ****         /* Update local heartbeat from static variable (may be reset by command processing) */
@@ -238,7 +238,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  199:Core/Src/bootloader.c ****             /* Wait for this message to be sent */
  200:Core/Src/bootloader.c ****             Bootloader_WaitForCANTransmission();
  201:Core/Src/bootloader.c ****             
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 5
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 5
 
 
  202:Core/Src/bootloader.c ****             /* Blink LEDs 5 times rapidly before jumping */
@@ -298,7 +298,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  256:Core/Src/bootloader.c ****             bootloader_status.state = BL_STATE_ERASING;
  257:Core/Src/bootloader.c ****             
  258:Core/Src/bootloader.c ****             /* Clear the application valid flag first */
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 6
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 6
 
 
  259:Core/Src/bootloader.c ****             Bootloader_ClearApplicationValidFlag();
@@ -358,7 +358,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  313:Core/Src/bootloader.c ****             {
  314:Core/Src/bootloader.c ****                 flash_buffer[buffer_index++] = rx_data[2 + i];
  315:Core/Src/bootloader.c ****             }
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 7
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 7
 
 
  316:Core/Src/bootloader.c ****             
@@ -418,7 +418,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  370:Core/Src/bootloader.c ****         case CMD_READ_FLASH:
  371:Core/Src/bootloader.c ****             /* Read flash memory */
  372:Core/Src/bootloader.c ****             address = (rx_data[1] << 24) | (rx_data[2] << 16) |
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 8
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 8
 
 
  373:Core/Src/bootloader.c ****                      (rx_data[3] << 8) | rx_data[4];
@@ -478,7 +478,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  427:Core/Src/bootloader.c **** }
  428:Core/Src/bootloader.c **** 
  429:Core/Src/bootloader.c **** /**
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 9
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 9
 
 
  430:Core/Src/bootloader.c ****   * @brief  Erase application flash area
@@ -538,7 +538,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  484:Core/Src/bootloader.c **** {
  485:Core/Src/bootloader.c ****     HAL_StatusTypeDef status = HAL_OK;
  486:Core/Src/bootloader.c ****     uint32_t i;
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 10
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 10
 
 
  487:Core/Src/bootloader.c ****     uint64_t data64;
@@ -598,7 +598,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  541:Core/Src/bootloader.c ****     {
  542:Core/Src/bootloader.c ****         bootloader_status.last_error = ERR_FLASH_WRITE_FAILED;
  543:Core/Src/bootloader.c ****         return ERR_FLASH_WRITE_FAILED;
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 11
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 11
 
 
  544:Core/Src/bootloader.c ****     }
@@ -658,7 +658,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  570:Core/Src/bootloader.c ****     {
  571:Core/Src/bootloader.c ****         return ERR_INVALID_ADDRESS;
  572:Core/Src/bootloader.c ****     }
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 12
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 12
 
 
  573:Core/Src/bootloader.c ****     
@@ -718,7 +718,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
   96              		.loc 1 571 16 view .LVU22
   97 003a 0220     		movs	r0, #2
   98              	.LVL8:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 13
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 13
 
 
  571:Core/Src/bootloader.c ****     }
@@ -778,7 +778,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  142 0010 0421     		movs	r1, #4
  143 0012 0191     		str	r1, [sp, #4]
  103:Core/Src/bootloader.c ****     can_filter.FilterMaskIdLow = 0x0004;   /* Only check IDE bit */
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 14
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 14
 
 
  144              		.loc 1 103 5 is_stmt 1 view .LVU36
@@ -838,7 +838,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  183              	.L18:
  184              		.align	2
  185              	.L17:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 15
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 15
 
 
  186 0038 00000000 		.word	hcan_bootloader
@@ -898,7 +898,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  626:Core/Src/bootloader.c ****     
  627:Core/Src/bootloader.c ****     /* Disable all interrupts */
  628:Core/Src/bootloader.c ****     __disable_irq();
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 16
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 16
 
 
  629:Core/Src/bootloader.c ****     
@@ -958,7 +958,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  232              	.L21:
  648:Core/Src/bootloader.c ****     }
  649:Core/Src/bootloader.c ****     
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 17
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 17
 
 
  650:Core/Src/bootloader.c ****     /* Additional delay to ensure message physically leaves the CAN controller */
@@ -1018,7 +1018,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  277              		.loc 1 447 5 view .LVU73
  447:Core/Src/bootloader.c ****     
  278              		.loc 1 447 5 discriminator 1 view .LVU74
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 18
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 18
 
 
  279 0008 134B     		ldr	r3, .L34
@@ -1078,7 +1078,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  459:Core/Src/bootloader.c ****         
  316              		.loc 1 459 18 is_stmt 0 view .LVU92
  317 002e 01A9     		add	r1, sp, #4
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 19
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 19
 
 
  318 0030 02A8     		add	r0, sp, #8
@@ -1138,7 +1138,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  359 0050 024B     		ldr	r3, .L34+4
  360 0052 1874     		strb	r0, [r3, #16]
  473:Core/Src/bootloader.c **** }
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 20
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 20
 
 
  361              		.loc 1 473 5 is_stmt 1 view .LVU106
@@ -1198,7 +1198,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  497:Core/Src/bootloader.c ****     {
  408              		.loc 1 497 5 is_stmt 1 view .LVU116
  497:Core/Src/bootloader.c ****     {
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 21
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 21
 
 
  409              		.loc 1 497 18 is_stmt 0 view .LVU117
@@ -1258,7 +1258,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  447 0040 A742     		cmp	r7, r4
  448 0042 36D9     		bls	.L42
  520:Core/Src/bootloader.c ****                  ((uint64_t)data[i + 1] << 8)  |
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 22
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 22
 
 
  449              		.loc 1 520 9 view .LVU134
@@ -1318,7 +1318,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  487              	.LVL38:
  531:Core/Src/bootloader.c ****         {
  488              		.loc 1 531 9 is_stmt 1 view .LVU151
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 23
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 23
 
 
  531:Core/Src/bootloader.c ****         {
@@ -1378,7 +1378,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  538:Core/Src/bootloader.c ****     
  528              		.loc 1 538 5 is_stmt 1 view .LVU167
  529 00b2 FFF7FEFF 		bl	HAL_FLASH_Lock
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 24
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 24
 
 
  530              	.LVL43:
@@ -1438,7 +1438,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  612:Core/Src/bootloader.c ****     /* Turn off and de-initialize LED */
  575              		.loc 1 612 1 is_stmt 1 view -0
  576              		.cfi_startproc
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 25
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 25
 
 
  577              		@ args = 0, pretend = 0, frame = 0
@@ -1498,7 +1498,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  628:Core/Src/bootloader.c ****     
  620              		.loc 1 628 5 is_stmt 1 view .LVU191
  621              	.LBB7:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 26
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 26
 
 
  622              	.LBI7:
@@ -1558,7 +1558,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
   53:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __NO_RETURN                            __attribute__((__noreturn__))
   54:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
   55:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __USED
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 27
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 27
 
 
   56:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __USED                                 __attribute__((used))
@@ -1618,7 +1618,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  110:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __ALIGNED
  111:Drivers/CMSIS/Include/cmsis_gcc.h ****   #define __ALIGNED(x)                           __attribute__((aligned(x)))
  112:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 28
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 28
 
 
  113:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef   __RESTRICT
@@ -1678,7 +1678,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  167:Drivers/CMSIS/Include/cmsis_gcc.h **** #endif
  168:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  169:Drivers/CMSIS/Include/cmsis_gcc.h **** #ifndef __INITIAL_SP
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 29
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 29
 
 
  170:Drivers/CMSIS/Include/cmsis_gcc.h **** #define __INITIAL_SP              __StackTop
@@ -1738,7 +1738,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  637 003e 03F59833 		add	r3, r3, #77824
  638 0042 DA6C     		ldr	r2, [r3, #76]
  639 0044 22F00102 		bic	r2, r2, #1
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 30
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 30
 
 
  640 0048 DA64     		str	r2, [r3, #76]
@@ -1798,7 +1798,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  593:Core/Src/bootloader.c ****     {
  686              		.loc 1 593 8 view .LVU205
  687 000a B3F1005F 		cmp	r3, #536870912
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 31
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 31
 
 
  688 000e 06D1     		bne	.L58
@@ -1858,7 +1858,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  661:Core/Src/bootloader.c ****     pFunction jump_to_application;
  662:Core/Src/bootloader.c ****     uint32_t jump_address;
  663:Core/Src/bootloader.c ****     uint32_t app_stack_pointer;
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 32
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 32
 
 
  664:Core/Src/bootloader.c ****     uint8_t jump_info[8];
@@ -1918,7 +1918,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  718:Core/Src/bootloader.c ****     tx_data[0] = RESP_ACK;
  719:Core/Src/bootloader.c ****     tx_data[1] = bootloader_status.last_error;
  720:Core/Src/bootloader.c ****     Bootloader_SendCANMessage(RESP_ACK, tx_data, 2);
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 33
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 33
 
 
  721:Core/Src/bootloader.c **** }
@@ -1978,7 +1978,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  752              		.loc 1 751 28 is_stmt 0 view .LVU221
  753 000c 11F803C0 		ldrb	ip, [r1, r3]	@ zero_extendqisi2
  754              		.loc 1 751 22 view .LVU222
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 34
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 34
 
 
  755 0010 03F10800 		add	r0, r3, #8
@@ -2038,7 +2038,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  797 003c 00000000 		.word	tx_header
  798 0040 00000000 		.word	tx_mailbox
  799 0044 00000000 		.word	hcan_bootloader
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 35
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 35
 
 
  800              		.cfi_endproc
@@ -2098,7 +2098,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  850              	Bootloader_SendNACK:
  851              	.LVL68:
  852              	.LFB144:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 36
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 36
 
 
  729:Core/Src/bootloader.c ****     bootloader_status.last_error = error_code;
@@ -2158,7 +2158,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  896              		.thumb
  897              		.thumb_func
  899              	Bootloader_JumpToApplication:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 37
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 37
 
 
  900              	.LFB142:
@@ -2218,7 +2218,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  678:Core/Src/bootloader.c ****     jump_info[2] = (app_stack_pointer >> 16) & 0xFF;
  938              		.loc 1 678 39 is_stmt 0 view .LVU270
  939 0016 230E     		lsrs	r3, r4, #24
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 38
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 38
 
 
  678:Core/Src/bootloader.c ****     jump_info[2] = (app_stack_pointer >> 16) & 0xFF;
@@ -2278,7 +2278,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  975              	.LVL75:
  691:Core/Src/bootloader.c ****     
  976              		.loc 1 691 5 view .LVU290
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 39
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 39
 
 
  691:Core/Src/bootloader.c ****     
@@ -2338,7 +2338,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  251:Drivers/CMSIS/Include/cmsis_gcc.h **** }
  252:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  253:Drivers/CMSIS/Include/cmsis_gcc.h **** 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 40
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 40
 
 
  254:Drivers/CMSIS/Include/cmsis_gcc.h **** #if (defined (__ARM_FEATURE_CMSE ) && (__ARM_FEATURE_CMSE == 3))
@@ -2398,7 +2398,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  308:Drivers/CMSIS/Include/cmsis_gcc.h **** 
  309:Drivers/CMSIS/Include/cmsis_gcc.h **** /**
  310:Drivers/CMSIS/Include/cmsis_gcc.h ****   \brief   Get Process Stack Pointer
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 41
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 41
 
 
  311:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Returns the current value of the Process Stack Pointer (PSP).
@@ -2458,7 +2458,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  365:Drivers/CMSIS/Include/cmsis_gcc.h ****   \details Returns the current value of the Main Stack Pointer (MSP).
  366:Drivers/CMSIS/Include/cmsis_gcc.h ****   \return               MSP Register value
  367:Drivers/CMSIS/Include/cmsis_gcc.h ****  */
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 42
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 42
 
 
  368:Drivers/CMSIS/Include/cmsis_gcc.h **** __STATIC_FORCEINLINE uint32_t __get_MSP(void)
@@ -2518,7 +2518,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  706:Core/Src/bootloader.c ****     
  1005              		.loc 1 706 5 is_stmt 1 view .LVU300
  1006 005a A847     		blx	r5
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 43
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 43
 
 
  1007              	.LVL78:
@@ -2578,7 +2578,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  767:Core/Src/bootloader.c ****     HAL_StatusTypeDef status;
  1052              		.loc 1 767 5 view .LVU306
  768:Core/Src/bootloader.c ****     uint32_t magic_data[2];
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 44
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 44
 
 
  1053              		.loc 1 768 5 view .LVU307
@@ -2638,7 +2638,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  788:Core/Src/bootloader.c ****         return ERR_FLASH_ERASE_FAILED;
  789:Core/Src/bootloader.c ****     }
  790:Core/Src/bootloader.c ****     
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 45
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 45
 
 
  791:Core/Src/bootloader.c ****     /* Write magic number (first 4 bytes) */
@@ -2698,7 +2698,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1124              	.LVL87:
  1125              	.L89:
  797:Core/Src/bootloader.c ****         return ERR_FLASH_WRITE_FAILED;
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 46
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 46
 
 
  1126              		.loc 1 797 9 is_stmt 1 view .LVU336
@@ -2758,7 +2758,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1167 0006 084B     		ldr	r3, .L97+4
  1168 0008 9A42     		cmp	r2, r3
  1169 000a 01D0     		beq	.L96
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 47
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 47
 
 
  817:Core/Src/bootloader.c ****         flag_ptr[1] == APP_VALID_FLAG_COMPLEMENT)
@@ -2818,7 +2818,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1209              		@ args = 0, pretend = 0, frame = 24
  1210              		@ frame_needed = 0, uses_anonymous_args = 0
  1211 0000 00B5     		push	{lr}
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 48
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 48
 
 
  1212              		.cfi_def_cfa_offset 4
@@ -2878,7 +2878,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1251              		.global	Bootloader_LED_Init
  1252              		.syntax unified
  1253              		.thumb
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 49
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 49
 
 
  1254              		.thumb_func
@@ -2938,7 +2938,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1296              		.global	Bootloader_LED_UpdateStatus
  1297              		.syntax unified
  1298              		.thumb
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 50
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 50
 
 
  1299              		.thumb_func
@@ -2998,7 +2998,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1336              	.LFE150:
  1338              		.section	.text.Bootloader_Init,"ax",%progbits
  1339              		.align	1
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 51
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 51
 
 
  1340              		.global	Bootloader_Init
@@ -3058,7 +3058,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1383 0022 A8B9     		cbnz	r0, .L113
  1384              	.L110:
   68:Core/Src/bootloader.c ****     {
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 52
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 52
 
 
  1385              		.loc 1 68 5 is_stmt 1 view .LVU389
@@ -3118,7 +3118,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1423              	.LVL105:
   86:Core/Src/bootloader.c **** 
  1424              		.loc 1 86 1 is_stmt 0 view .LVU406
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 53
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 53
 
 
  1425 004e 10BD     		pop	{r4, pc}
@@ -3178,7 +3178,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1472 0006 1A70     		strb	r2, [r3]
  232:Core/Src/bootloader.c ****     
  1473              		.loc 1 232 5 is_stmt 1 view .LVU416
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 54
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 54
 
 
  1474 0008 2021     		movs	r1, #32
@@ -3238,7 +3238,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1516              		.loc 1 246 13 is_stmt 1 view .LVU428
  246:Core/Src/bootloader.c ****             tx_data[3] = (bootloader_status.bytes_written >> 24) & 0xFF;
  1517              		.loc 1 246 43 is_stmt 0 view .LVU429
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 55
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 55
 
 
  1518 0042 1A7C     		ldrb	r2, [r3, #16]	@ zero_extendqisi2
@@ -3298,7 +3298,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1554 0060 0122     		movs	r2, #1
  1555 0062 1A70     		strb	r2, [r3]
  259:Core/Src/bootloader.c ****             
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 56
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 56
 
 
  1556              		.loc 1 259 13 is_stmt 1 view .LVU448
@@ -3358,7 +3358,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1595 008c F8E7     		b	.L129
  1596              	.LVL119:
  1597              	.L121:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 57
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 57
 
 
  280:Core/Src/bootloader.c ****                      (rx_data[3] << 8) | rx_data[4];
@@ -3418,7 +3418,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1634 00b8 0022     		movs	r2, #0
  287:Core/Src/bootloader.c ****                 Bootloader_SendACK();
  1635              		.loc 1 287 30 view .LVU482
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 58
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 58
 
 
  1636 00ba 1A80     		strh	r2, [r3]	@ movhi
@@ -3478,7 +3478,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  306:Core/Src/bootloader.c ****                 buffer_index = 0;  /* Reset buffer on error */
  1677              		.loc 1 306 17 view .LVU496
  306:Core/Src/bootloader.c ****                 buffer_index = 0;  /* Reset buffer on error */
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 59
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 59
 
 
  1678              		.loc 1 306 41 is_stmt 0 view .LVU497
@@ -3538,7 +3538,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1718              		.loc 1 318 13 view .LVU511
  318:Core/Src/bootloader.c ****             {
  1719              		.loc 1 318 30 is_stmt 0 view .LVU512
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 60
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 60
 
 
  1720 010c 504B     		ldr	r3, .L148+28
@@ -3598,7 +3598,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  327:Core/Src/bootloader.c ****                 }
  1759              		.loc 1 327 21 is_stmt 0 view .LVU528
  1760 013a 07E0     		b	.L135
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 61
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 61
 
 
  1761              	.LVL134:
@@ -3658,7 +3658,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1800 0160 DA78     		ldrb	r2, [r3, #3]	@ zero_extendqisi2
  345:Core/Src/bootloader.c ****                      (rx_data[3] << 8) | rx_data[4];
  1801              		.loc 1 345 63 view .LVU544
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 62
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 62
 
 
  1802 0162 40EA0220 		orr	r0, r0, r2, lsl #8
@@ -3718,7 +3718,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1839 018c 2E4B     		ldr	r3, .L148+20
  1840 018e 0022     		movs	r2, #0
  1841 0190 1A70     		strb	r2, [r3]
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 63
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 63
 
 
  1842 0192 63E7     		b	.L117
@@ -3778,7 +3778,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1881              	.LVL149:
  374:Core/Src/bootloader.c **** 
  1882              		.loc 1 374 13 is_stmt 1 view .LVU577
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 64
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 64
 
 
  374:Core/Src/bootloader.c **** 
@@ -3838,7 +3838,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  1922              	.LVL154:
  382:Core/Src/bootloader.c ****                 {
  1923              		.loc 1 382 17 is_stmt 1 view .LVU593
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 65
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 65
 
 
  382:Core/Src/bootloader.c ****                 {
@@ -3898,7 +3898,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  407:Core/Src/bootloader.c ****                 }
  1964              		.loc 1 407 21 is_stmt 1 view .LVU608
  407:Core/Src/bootloader.c ****                 }
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 66
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 66
 
 
  1965              		.loc 1 407 50 is_stmt 0 view .LVU609
@@ -3958,7 +3958,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2011              		.cfi_endproc
  2012              	.LFE135:
  2014              		.section	.text.Bootloader_LED_FlashingStart,"ax",%progbits
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 67
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 67
 
 
  2015              		.align	1
@@ -4018,7 +4018,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2055              		.syntax unified
  2056              		.thumb
  2057              		.thumb_func
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 68
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 68
 
 
  2059              	Bootloader_LED_FlashingUpdate:
@@ -4078,7 +4078,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2098              	.LVL169:
  2099              	.L155:
  913:Core/Src/bootloader.c ****     {
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 69
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 69
 
 
  914:Core/Src/bootloader.c ****         LED1_OFF();
@@ -4138,7 +4138,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2144 0052 4FF09040 		mov	r0, #1207959552
  2145 0056 FFF7FEFF 		bl	HAL_GPIO_WritePin
  2146              	.LVL178:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 70
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 70
 
 
  924:Core/Src/bootloader.c ****         HAL_Delay(10);
@@ -4198,7 +4198,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2189 0094 2021     		movs	r1, #32
  2190 0096 2046     		mov	r0, r4
  2191 0098 FFF7FEFF 		bl	HAL_GPIO_WritePin
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 71
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 71
 
 
  2192              	.LVL187:
@@ -4258,7 +4258,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2239              	.LVL192:
  123:Core/Src/bootloader.c ****     uint8_t timeout_expired = 0;
  2240              		.loc 1 123 32 view .LVU657
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 72
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 72
 
 
  2241 0012 0446     		mov	r4, r0
@@ -4318,7 +4318,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2279              		.loc 1 142 31 is_stmt 0 view .LVU673
  2280 0036 FFF7FEFF 		bl	HAL_GetTick
  2281              	.LVL199:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 73
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 73
 
 
  2282 003a 0446     		mov	r4, r0
@@ -4378,7 +4378,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2321 0066 36E0     		b	.L161
  2322              	.LVL205:
  2323              	.L169:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 74
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 74
 
 
  172:Core/Src/bootloader.c ****                 tx_data[1] = 0xAA;  /* Special: Timeout auto-jump */
@@ -4438,7 +4438,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2363 0094 8BB1     		cbz	r3, .L163
  194:Core/Src/bootloader.c ****             tx_data[1] = 0xFF;  /* Special: About to jump */
  2364              		.loc 1 194 13 is_stmt 1 view .LVU704
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 75
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 75
 
 
  194:Core/Src/bootloader.c ****             tx_data[1] = 0xFF;  /* Special: About to jump */
@@ -4498,7 +4498,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2403              		.loc 1 139 14 is_stmt 0 view .LVU720
  2404 00c0 FFF7FEFF 		bl	HAL_GetTick
  2405              	.LVL217:
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 76
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 76
 
 
  139:Core/Src/bootloader.c ****         {
@@ -4558,7 +4558,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2445              		.loc 1 166 13 is_stmt 1 view .LVU735
  2446              	.LVL222:
  169:Core/Src/bootloader.c ****             {
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 77
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 77
 
 
  2447              		.loc 1 169 13 view .LVU736
@@ -4618,7 +4618,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2491 0004 1B68     		ldr	r3, [r3]
  2492              		.loc 1 942 8 view .LVU744
  2493 0006 8342     		cmp	r3, r0
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 78
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 78
 
 
  2494 0008 00D0     		beq	.L175
@@ -4678,7 +4678,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2526 002c FFF7FEFF 		bl	Bootloader_ProcessCANMessage
  2527              	.LVL228:
  2528              		.loc 1 955 1 is_stmt 0 view .LVU755
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 79
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 79
 
 
  2529 0030 EBE7     		b	.L172
@@ -4738,7 +4738,7 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2597 0000 00000000 		.space	28
  2597      00000000 
  2597      00000000 
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 80
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 80
 
 
  2597      00000000 
@@ -4771,107 +4771,107 @@ ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 1
  2623              		.file 14 "Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h"
  2624              		.file 15 "C:/Users/Ali/AppData/Roaming/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-too
  2625              		.file 16 "Core/Inc/main.h"
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 81
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 81
 
 
 DEFINED SYMBOLS
                             *ABS*:00000000 bootloader.c
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:21     .text.Bootloader_ReadFlash:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:26     .text.Bootloader_ReadFlash:00000000 Bootloader_ReadFlash
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:104    .text.Bootloader_ReadFlash:00000040 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:109    .text.Bootloader_ConfigureCANFilter:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:114    .text.Bootloader_ConfigureCANFilter:00000000 Bootloader_ConfigureCANFilter
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:186    .text.Bootloader_ConfigureCANFilter:00000038 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2608   .bss.hcan_bootloader:00000000 hcan_bootloader
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:191    .text.Bootloader_WaitForCANTransmission:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:196    .text.Bootloader_WaitForCANTransmission:00000000 Bootloader_WaitForCANTransmission
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:244    .text.Bootloader_WaitForCANTransmission:00000024 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:250    .text.Bootloader_EraseApplicationFlash:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:255    .text.Bootloader_EraseApplicationFlash:00000000 Bootloader_EraseApplicationFlash
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:367    .text.Bootloader_EraseApplicationFlash:00000058 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2602   .bss.bootloader_status:00000000 bootloader_status
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:373    .text.Bootloader_WriteFlash:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:378    .text.Bootloader_WriteFlash:00000000 Bootloader_WriteFlash
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:561    .text.Bootloader_WriteFlash:000000d4 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:568    .text.Bootloader_DeInit:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:573    .text.Bootloader_DeInit:00000000 Bootloader_DeInit
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:654    .text.Bootloader_DeInit:0000005c $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:660    .text.Bootloader_CheckValidApplication:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:666    .text.Bootloader_CheckValidApplication:00000000 Bootloader_CheckValidApplication
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:714    .text.Bootloader_CheckValidApplication:00000028 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:720    .text.Bootloader_SendCANMessage:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:726    .text.Bootloader_SendCANMessage:00000000 Bootloader_SendCANMessage
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:797    .text.Bootloader_SendCANMessage:0000003c $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2578   .bss.tx_header:00000000 tx_header
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2572   .bss.tx_mailbox:00000000 tx_mailbox
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:804    .text.Bootloader_SendACK:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:809    .text.Bootloader_SendACK:00000000 Bootloader_SendACK
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:839    .text.Bootloader_SendACK:00000018 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2584   .bss.tx_data:00000000 tx_data
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:845    .text.Bootloader_SendNACK:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:850    .text.Bootloader_SendNACK:00000000 Bootloader_SendNACK
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:887    .text.Bootloader_SendNACK:00000018 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:893    .text.Bootloader_JumpToApplication:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:899    .text.Bootloader_JumpToApplication:00000000 Bootloader_JumpToApplication
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1027   .text.Bootloader_JumpToApplication:00000068 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1034   .text.Bootloader_SetApplicationValidFlag:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1040   .text.Bootloader_SetApplicationValidFlag:00000000 Bootloader_SetApplicationValidFlag
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1138   .text.Bootloader_SetApplicationValidFlag:00000058 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1147   .text.Bootloader_CheckApplicationValidFlag:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1153   .text.Bootloader_CheckApplicationValidFlag:00000000 Bootloader_CheckApplicationValidFlag
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1192   .text.Bootloader_CheckApplicationValidFlag:00000024 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1199   .text.Bootloader_ClearApplicationValidFlag:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1205   .text.Bootloader_ClearApplicationValidFlag:00000000 Bootloader_ClearApplicationValidFlag
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1250   .text.Bootloader_LED_Init:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1256   .text.Bootloader_LED_Init:00000000 Bootloader_LED_Init
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1290   .text.Bootloader_LED_Init:00000028 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1295   .text.Bootloader_LED_UpdateStatus:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1301   .text.Bootloader_LED_UpdateStatus:00000000 Bootloader_LED_UpdateStatus
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1339   .text.Bootloader_Init:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1345   .text.Bootloader_Init:00000000 Bootloader_Init
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1439   .text.Bootloader_Init:0000005c $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1448   .text.Bootloader_ProcessCANMessage:00000000 $t
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 82
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:21     .text.Bootloader_ReadFlash:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:26     .text.Bootloader_ReadFlash:00000000 Bootloader_ReadFlash
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:104    .text.Bootloader_ReadFlash:00000040 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:109    .text.Bootloader_ConfigureCANFilter:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:114    .text.Bootloader_ConfigureCANFilter:00000000 Bootloader_ConfigureCANFilter
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:186    .text.Bootloader_ConfigureCANFilter:00000038 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2608   .bss.hcan_bootloader:00000000 hcan_bootloader
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:191    .text.Bootloader_WaitForCANTransmission:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:196    .text.Bootloader_WaitForCANTransmission:00000000 Bootloader_WaitForCANTransmission
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:244    .text.Bootloader_WaitForCANTransmission:00000024 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:250    .text.Bootloader_EraseApplicationFlash:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:255    .text.Bootloader_EraseApplicationFlash:00000000 Bootloader_EraseApplicationFlash
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:367    .text.Bootloader_EraseApplicationFlash:00000058 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2602   .bss.bootloader_status:00000000 bootloader_status
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:373    .text.Bootloader_WriteFlash:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:378    .text.Bootloader_WriteFlash:00000000 Bootloader_WriteFlash
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:561    .text.Bootloader_WriteFlash:000000d4 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:568    .text.Bootloader_DeInit:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:573    .text.Bootloader_DeInit:00000000 Bootloader_DeInit
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:654    .text.Bootloader_DeInit:0000005c $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:660    .text.Bootloader_CheckValidApplication:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:666    .text.Bootloader_CheckValidApplication:00000000 Bootloader_CheckValidApplication
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:714    .text.Bootloader_CheckValidApplication:00000028 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:720    .text.Bootloader_SendCANMessage:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:726    .text.Bootloader_SendCANMessage:00000000 Bootloader_SendCANMessage
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:797    .text.Bootloader_SendCANMessage:0000003c $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2578   .bss.tx_header:00000000 tx_header
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2572   .bss.tx_mailbox:00000000 tx_mailbox
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:804    .text.Bootloader_SendACK:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:809    .text.Bootloader_SendACK:00000000 Bootloader_SendACK
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:839    .text.Bootloader_SendACK:00000018 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2584   .bss.tx_data:00000000 tx_data
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:845    .text.Bootloader_SendNACK:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:850    .text.Bootloader_SendNACK:00000000 Bootloader_SendNACK
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:887    .text.Bootloader_SendNACK:00000018 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:893    .text.Bootloader_JumpToApplication:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:899    .text.Bootloader_JumpToApplication:00000000 Bootloader_JumpToApplication
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1027   .text.Bootloader_JumpToApplication:00000068 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1034   .text.Bootloader_SetApplicationValidFlag:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1040   .text.Bootloader_SetApplicationValidFlag:00000000 Bootloader_SetApplicationValidFlag
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1138   .text.Bootloader_SetApplicationValidFlag:00000058 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1147   .text.Bootloader_CheckApplicationValidFlag:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1153   .text.Bootloader_CheckApplicationValidFlag:00000000 Bootloader_CheckApplicationValidFlag
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1192   .text.Bootloader_CheckApplicationValidFlag:00000024 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1199   .text.Bootloader_ClearApplicationValidFlag:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1205   .text.Bootloader_ClearApplicationValidFlag:00000000 Bootloader_ClearApplicationValidFlag
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1250   .text.Bootloader_LED_Init:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1256   .text.Bootloader_LED_Init:00000000 Bootloader_LED_Init
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1290   .text.Bootloader_LED_Init:00000028 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1295   .text.Bootloader_LED_UpdateStatus:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1301   .text.Bootloader_LED_UpdateStatus:00000000 Bootloader_LED_UpdateStatus
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1339   .text.Bootloader_Init:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1345   .text.Bootloader_Init:00000000 Bootloader_Init
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1439   .text.Bootloader_Init:0000005c $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1448   .text.Bootloader_ProcessCANMessage:00000000 $t
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 82
 
 
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1454   .text.Bootloader_ProcessCANMessage:00000000 Bootloader_ProcessCANMessage
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1496   .text.Bootloader_ProcessCANMessage:00000028 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:1503   .text.Bootloader_ProcessCANMessage:00000036 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2000   .text.Bootloader_ProcessCANMessage:00000234 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2549   .bss.can_command_received:00000000 can_command_received
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2544   .bss.last_heartbeat_time:00000000 last_heartbeat_time
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2590   .bss.rx_data:00000000 rx_data
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2560   .bss.buffer_index:00000000 buffer_index
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2566   .bss.flash_buffer:00000000 flash_buffer
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2554   .bss.jump_to_app_flag:00000000 jump_to_app_flag
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2015   .text.Bootloader_LED_FlashingStart:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2021   .text.Bootloader_LED_FlashingStart:00000000 Bootloader_LED_FlashingStart
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2034   .text.Bootloader_LED_FlashingStop:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2040   .text.Bootloader_LED_FlashingStop:00000000 Bootloader_LED_FlashingStop
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2053   .text.Bootloader_LED_FlashingUpdate:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2059   .text.Bootloader_LED_FlashingUpdate:00000000 Bootloader_LED_FlashingUpdate
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2072   .text.Bootloader_LED_BlinkBeforeJump:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2078   .text.Bootloader_LED_BlinkBeforeJump:00000000 Bootloader_LED_BlinkBeforeJump
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2198   .text.Bootloader_LED_BlinkBeforeJump:000000a0 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2203   .text.Bootloader_Main:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2209   .text.Bootloader_Main:00000000 Bootloader_Main
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2460   .text.Bootloader_Main:000000fc $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2470   .text.HAL_CAN_RxFifo0MsgPendingCallback:00000000 $t
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2476   .text.HAL_CAN_RxFifo0MsgPendingCallback:00000000 HAL_CAN_RxFifo0MsgPendingCallback
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2533   .text.HAL_CAN_RxFifo0MsgPendingCallback:00000034 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2596   .bss.rx_header:00000000 rx_header
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2541   .bss.last_heartbeat_time:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2550   .bss.can_command_received:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2555   .bss.jump_to_app_flag:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2557   .bss.buffer_index:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2563   .bss.flash_buffer:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2569   .bss.tx_mailbox:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2575   .bss.tx_header:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2581   .bss.tx_data:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2587   .bss.rx_data:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2593   .bss.rx_header:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2599   .bss.bootloader_status:00000000 $d
-C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s:2605   .bss.hcan_bootloader:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1454   .text.Bootloader_ProcessCANMessage:00000000 Bootloader_ProcessCANMessage
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1496   .text.Bootloader_ProcessCANMessage:00000028 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:1503   .text.Bootloader_ProcessCANMessage:00000036 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2000   .text.Bootloader_ProcessCANMessage:00000234 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2549   .bss.can_command_received:00000000 can_command_received
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2544   .bss.last_heartbeat_time:00000000 last_heartbeat_time
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2590   .bss.rx_data:00000000 rx_data
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2560   .bss.buffer_index:00000000 buffer_index
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2566   .bss.flash_buffer:00000000 flash_buffer
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2554   .bss.jump_to_app_flag:00000000 jump_to_app_flag
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2015   .text.Bootloader_LED_FlashingStart:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2021   .text.Bootloader_LED_FlashingStart:00000000 Bootloader_LED_FlashingStart
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2034   .text.Bootloader_LED_FlashingStop:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2040   .text.Bootloader_LED_FlashingStop:00000000 Bootloader_LED_FlashingStop
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2053   .text.Bootloader_LED_FlashingUpdate:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2059   .text.Bootloader_LED_FlashingUpdate:00000000 Bootloader_LED_FlashingUpdate
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2072   .text.Bootloader_LED_BlinkBeforeJump:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2078   .text.Bootloader_LED_BlinkBeforeJump:00000000 Bootloader_LED_BlinkBeforeJump
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2198   .text.Bootloader_LED_BlinkBeforeJump:000000a0 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2203   .text.Bootloader_Main:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2209   .text.Bootloader_Main:00000000 Bootloader_Main
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2460   .text.Bootloader_Main:000000fc $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2470   .text.HAL_CAN_RxFifo0MsgPendingCallback:00000000 $t
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2476   .text.HAL_CAN_RxFifo0MsgPendingCallback:00000000 HAL_CAN_RxFifo0MsgPendingCallback
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2533   .text.HAL_CAN_RxFifo0MsgPendingCallback:00000034 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2596   .bss.rx_header:00000000 rx_header
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2541   .bss.last_heartbeat_time:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2550   .bss.can_command_received:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2555   .bss.jump_to_app_flag:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2557   .bss.buffer_index:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2563   .bss.flash_buffer:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2569   .bss.tx_mailbox:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2575   .bss.tx_header:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2581   .bss.tx_data:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2587   .bss.rx_data:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2593   .bss.rx_header:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2599   .bss.bootloader_status:00000000 $d
+C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s:2605   .bss.hcan_bootloader:00000000 $d
 
 UNDEFINED SYMBOLS
 HAL_CAN_ConfigFilter
@@ -4891,7 +4891,7 @@ HAL_CAN_AddTxMessage
 HAL_CAN_Start
 HAL_CAN_ActivateNotification
 HAL_GetTick
-ARM GAS  C:\Users\Ali\AppData\Local\Temp\ccVp9Hi3.s 			page 83
+ARM GAS  C:\Users\Ali\AppData\Local\Temp\cc3sxNW0.s 			page 83
 
 
 HAL_GPIO_TogglePin
