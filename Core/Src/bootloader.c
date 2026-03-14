@@ -20,7 +20,6 @@
 /* Private variables ---------------------------------------------------------*/
 static CAN_HandleTypeDef *hcan_bootloader;
 static BootloaderStatus_t bootloader_status;
-static CAN_RxHeaderTypeDef rx_header;
 static uint8_t rx_data[8];
 static uint8_t tx_data[8];
 static CAN_TxHeaderTypeDef tx_header;
@@ -30,6 +29,7 @@ static uint16_t buffer_index = 0;   /* Current position in flash_buffer */
 static volatile uint8_t jump_to_app_flag = 0;  /* Flag to trigger jump from main loop */
 static volatile uint8_t can_command_received = 0;  /* Flag to disable auto-jump timeout */
 static uint32_t last_heartbeat_time = 0;  /* Last heartbeat timestamp for resetting on commands */
+static volatile uint8_t rx_msg_pending = 0;  /* Flag: message waiting for main loop processing */
 
 /* Private function prototypes -----------------------------------------------*/
 static void Bootloader_ConfigureCANFilter(void);
@@ -97,11 +97,20 @@ static void Bootloader_ConfigureCANFilter(void)
     can_filter.FilterMode = CAN_FILTERMODE_IDMASK;
     can_filter.FilterScale = CAN_FILTERSCALE_32BIT;
     
-    /* Accept ALL extended IDs for debugging - we'll check ID in callback */
-    can_filter.FilterIdHigh = 0x0000;
-    can_filter.FilterIdLow = 0x0004;   /* IDE bit set (extended ID only) */
-    can_filter.FilterMaskIdHigh = 0x0000;  /* Don't care about ID bits */
-    can_filter.FilterMaskIdLow = 0x0004;   /* Only check IDE bit */
+    /* Accept ONLY the host CAN ID (CAN_HOST_ID) with exact 29-bit match.
+     * For 32-bit filter scale with extended IDs, the register layout is:
+     *   Bits [31:3] = 29-bit Extended ID
+     *   Bit  [2]    = IDE (1 = extended frame)
+     *   Bit  [1]    = RTR
+     *   Bit  [0]    = 0
+     * This prevents other CAN bus traffic from filling the 3-deep hardware FIFO. */
+    uint32_t filter_id   = (CAN_HOST_ID << 3) | 0x04;        /* IDE bit set */
+    uint32_t filter_mask = (0x1FFFFFFFUL << 3) | 0x04;       /* Match all 29 ID bits + IDE */
+    
+    can_filter.FilterIdHigh   = (filter_id >> 16) & 0xFFFF;
+    can_filter.FilterIdLow    = filter_id & 0xFFFF;
+    can_filter.FilterMaskIdHigh = (filter_mask >> 16) & 0xFFFF;
+    can_filter.FilterMaskIdLow  = filter_mask & 0xFFFF;
     can_filter.FilterFIFOAssignment = CAN_RX_FIFO0;
     can_filter.FilterActivation = ENABLE;
     can_filter.SlaveStartFilterBank = 14;
@@ -209,8 +218,13 @@ void Bootloader_Main(void)
             jump_to_app_flag = 0;
         }
         
-        /* Process received CAN messages (handled in interrupt) */
-        HAL_Delay(1);
+        /* Process received CAN messages (deferred from interrupt to avoid
+         * blocking ISR during slow flash writes on a busy bus) */
+        if (rx_msg_pending)
+        {
+            Bootloader_ProcessCANMessage();
+            rx_msg_pending = 0;
+        }
     }
 }
 
@@ -744,6 +758,7 @@ void Bootloader_SendCANMessage(uint8_t cmd, uint8_t *data, uint8_t length)
 {
     uint8_t i;
     uint8_t tx_buffer[8] = {0};
+    uint32_t timeout;
     
     /* Copy data to TX buffer */
     for (i = 0; i < length && i < 8; i++)
@@ -753,6 +768,13 @@ void Bootloader_SendCANMessage(uint8_t cmd, uint8_t *data, uint8_t length)
     
     /* Set DLC */
     tx_header.DLC = length;
+    
+    /* Wait for a free TX mailbox (busy bus can stall all 3 mailboxes) */
+    timeout = 0;
+    while (HAL_CAN_GetTxMailboxesFreeLevel(hcan_bootloader) == 0 && timeout < 1000000)
+    {
+        timeout++;
+    }
     
     /* Send message */
     HAL_CAN_AddTxMessage(hcan_bootloader, &tx_header, tx_buffer, &tx_mailbox);
@@ -939,16 +961,24 @@ void Bootloader_LED_BlinkBeforeJump(void)
   */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
+    CAN_RxHeaderTypeDef isr_rx_header;
+    uint8_t isr_rx_data[8];
+
     if (hcan == hcan_bootloader)
     {
-        /* Get message from FIFO */
-        if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &rx_header, rx_data) == HAL_OK)
+        /* Drain message from hardware FIFO immediately (prevents FIFO overflow) */
+        if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &isr_rx_header, isr_rx_data) == HAL_OK)
         {
             /* Check if message is for bootloader (using ExtId for 29-bit extended ID) */
-            if (rx_header.ExtId == CAN_HOST_ID && rx_header.IDE == CAN_ID_EXT)
+            if (isr_rx_header.ExtId == CAN_HOST_ID && isr_rx_header.IDE == CAN_ID_EXT)
             {
-                /* Process the message */
-                Bootloader_ProcessCANMessage();
+                /* Queue for main loop processing only if previous message was consumed.
+                 * This avoids slow flash operations blocking the ISR on a busy bus. */
+                if (!rx_msg_pending)
+                {
+                    memcpy(rx_data, isr_rx_data, 8);
+                    rx_msg_pending = 1;
+                }
             }
         }
     }

@@ -213,9 +213,14 @@ APP_START_ADDRESS = 0x08008000
 APP_MAX_SIZE = 208 * 1024  # 208 KB (last 16KB reserved for permanent storage)
 
 # Timing
-RESPONSE_TIMEOUT = 1.0       # Normal response timeout (seconds)
+RESPONSE_TIMEOUT = 2.0       # Normal response timeout (seconds) - generous for busy bus
 ERASE_TIMEOUT = 15.0         # Flash erase timeout (seconds)
+WRITE_TIMEOUT = 0.5          # Per-chunk write ACK timeout (seconds)
+READ_TIMEOUT = 0.5           # Per-chunk read response timeout (seconds)
 WRITE_CHUNK_SIZE = 4         # Write 4 bytes per CAN message (bootloader buffers 2 chunks for 8-byte flash write)
+
+# Retry configuration
+MAX_RETRIES = 3              # Maximum retries per operation on failure
 
 
 # ============================================================================
@@ -335,7 +340,10 @@ class CANBootloaderFlash:
         start_time = time.time()
         
         while (time.time() - start_time) < timeout:
-            msg = self.driver.read_message(timeout=0.1)
+            remaining = timeout - (time.time() - start_time)
+            if remaining <= 0:
+                break
+            msg = self.driver.read_message(timeout=min(0.05, remaining))
             
             if msg and msg.id == CAN_BOOTLOADER_ID:
                 return msg
@@ -377,7 +385,7 @@ class CANBootloaderFlash:
     
     def get_status(self) -> Optional[BootloaderStatus]:
         """
-        Get bootloader status.
+        Get bootloader status with retry.
         
         Returns:
             BootloaderStatus object or None if failed
@@ -385,34 +393,39 @@ class CANBootloaderFlash:
         if self.verbose:
             print("Getting bootloader status...")
         
-        # Send GET_STATUS command
-        if not self.send_command(CMD_GET_STATUS, []):
-            return None
+        for attempt in range(MAX_RETRIES):
+            if attempt > 0:
+                self.driver.clear_receive_queue()
+                time.sleep(0.05)
+            
+            # Send GET_STATUS command
+            if not self.send_command(CMD_GET_STATUS, []):
+                continue
+            
+            # Wait for response
+            resp = self.wait_response()
+            if not resp or len(resp.data) < 7:
+                continue
+            
+            # Parse response
+            if resp.data[0] == RESP_DATA:
+                status = BootloaderStatus(
+                    state=resp.data[1],
+                    error=resp.data[2],
+                    bytes_written=(resp.data[3] << 24) | (resp.data[4] << 16) | 
+                                  (resp.data[5] << 8) | resp.data[6]
+                )
+                if self.verbose:
+                    print(f"✓ {status}")
+                return status
         
-        # Wait for response
-        resp = self.wait_response()
-        if not resp or len(resp.data) < 7:
-            if self.verbose:
-                print("✗ No response or invalid response")
-            return None
-        
-        # Parse response
-        if resp.data[0] == RESP_DATA:
-            status = BootloaderStatus(
-                state=resp.data[1],
-                error=resp.data[2],
-                bytes_written=(resp.data[3] << 24) | (resp.data[4] << 16) | 
-                              (resp.data[5] << 8) | resp.data[6]
-            )
-            if self.verbose:
-                print(f"✓ {status}")
-            return status
-        
+        if self.verbose:
+            print("✗ No response or invalid response")
         return None
     
     def erase_flash(self) -> bool:
         """
-        Erase application flash area.
+        Erase application flash area with retry.
         
         Returns:
             True if erase successful
@@ -422,29 +435,38 @@ class CANBootloaderFlash:
         print("="*60)
         print("This may take several seconds...")
         
-        # Send ERASE command
-        if not self.send_command(CMD_ERASE_FLASH, []):
-            print("✗ Failed to send erase command")
-            return False
+        for attempt in range(MAX_RETRIES):
+            if attempt > 0:
+                print(f"  Retry {attempt}/{MAX_RETRIES}...")
+                self.driver.clear_receive_queue()
+                time.sleep(0.1)
+            
+            # Send ERASE command
+            if not self.send_command(CMD_ERASE_FLASH, []):
+                print("✗ Failed to send erase command")
+                continue
+            
+            # Wait for ACK (with longer timeout)
+            resp = self.wait_response(timeout=ERASE_TIMEOUT)
+            
+            if not resp:
+                print("✗ Erase timeout (no response)")
+                continue
+            
+            if resp.data[0] == RESP_ACK:
+                print("✓ Flash erased successfully\n")
+                return True
+            elif resp.data[0] == RESP_NACK:
+                error_code = resp.data[1] if len(resp.data) > 1 else 0
+                error_desc = ERROR_DESCRIPTIONS.get(error_code, f"Error {error_code}")
+                print(f"✗ Erase failed: {error_desc}")
+                return False  # NACK is a definitive failure, don't retry
+            else:
+                print(f"✗ Unexpected response: 0x{resp.data[0]:02X}")
+                continue
         
-        # Wait for ACK (with longer timeout)
-        resp = self.wait_response(timeout=ERASE_TIMEOUT)
-        
-        if not resp:
-            print("✗ Erase timeout (no response)")
-            return False
-        
-        if resp.data[0] == RESP_ACK:
-            print("✓ Flash erased successfully\n")
-            return True
-        elif resp.data[0] == RESP_NACK:
-            error_code = resp.data[1] if len(resp.data) > 1 else 0
-            error_desc = ERROR_DESCRIPTIONS.get(error_code, f"Error {error_code}")
-            print(f"✗ Erase failed: {error_desc}")
-            return False
-        else:
-            print(f"✗ Unexpected response: 0x{resp.data[0]:02X}")
-            return False
+        print("✗ Erase failed after all retries")
+        return False
     
     def set_address(self, address: int) -> bool:
         """
@@ -492,17 +514,16 @@ class CANBootloaderFlash:
         
         return False
     
-    def write_4bytes(self, data: bytes, wait_ack: bool = True) -> bool:
+    def write_4bytes(self, data: bytes) -> bool:
         """
         Write exactly 4 bytes to flash.
         Bootloader buffers two 4-byte chunks before writing 8 bytes to flash.
         
         Args:
             data: Exactly 4 bytes to write
-            wait_ack: Wait for ACK response (default: True, set False for batched writes)
             
         Returns:
-            True if write successful (or sent if wait_ack=False)
+            True if write ACK received
         """
         if len(data) != 4:
             raise ValueError(f"Must write exactly 4 bytes, got {len(data)}")
@@ -514,12 +535,8 @@ class CANBootloaderFlash:
         if not self.send_command(CMD_WRITE_DATA, cmd_data):
             return False
         
-        # Skip waiting for ACK if batching (caller will check later)
-        if not wait_ack:
-            return True
-        
-        # Wait for ACK with shorter timeout for faster failure detection
-        resp = self.wait_response(timeout=0.1)
+        # Wait for ACK with generous timeout for busy bus arbitration
+        resp = self.wait_response(timeout=WRITE_TIMEOUT)
         
         if not resp:
             return False
@@ -528,42 +545,12 @@ class CANBootloaderFlash:
             return True
         elif resp.data[0] == RESP_NACK:
             error_code = resp.data[1] if len(resp.data) > 1 else 0
-            print(f"\n✗ Write failed: {ERROR_DESCRIPTIONS.get(error_code, 'Unknown error')}")
+            print(f"\n✗ Write NACK: {ERROR_DESCRIPTIONS.get(error_code, 'Unknown error')}")
             return False
         
         return False
     
-    def read_pending_acks(self, expected_count: int, timeout: float = 0.5) -> int:
-        """
-        Read multiple pending ACK responses.
-        
-        Args:
-            expected_count: Number of ACKs to read
-            timeout: Total timeout for all ACKs
-            
-        Returns:
-            Number of successful ACKs received
-        """
-        ack_count = 0
-        start_time = time.time()
-        
-        while ack_count < expected_count and (time.time() - start_time) < timeout:
-            remaining_time = timeout - (time.time() - start_time)
-            resp = self.wait_response(timeout=min(0.05, remaining_time))
-            
-            if not resp:
-                break
-            
-            if resp.data[0] == RESP_ACK:
-                ack_count += 1
-            elif resp.data[0] == RESP_NACK:
-                error_code = resp.data[1] if len(resp.data) > 1 else 0
-                print(f"\n✗ Write failed: {ERROR_DESCRIPTIONS.get(error_code, 'Unknown error')}")
-                return -1
-        
-        return ack_count
-    
-    def read_data(self, address: int, length: int, timeout: float = RESPONSE_TIMEOUT) -> Optional[bytes]:
+    def read_data(self, address: int, length: int, timeout: float = READ_TIMEOUT) -> Optional[bytes]:
         """
         Read data from flash.
         
@@ -600,31 +587,6 @@ class CANBootloaderFlash:
         
         return None
     
-    def read_data_no_wait(self, address: int, length: int) -> bool:
-        """
-        Send a read command without waiting for response (for batched reads).
-        
-        Args:
-            address: Flash address
-            length: Number of bytes to read (max 7)
-            
-        Returns:
-            True if command sent successfully
-        """
-        if length == 0 or length > 7:
-            return False
-        
-        # Build command: [CMD] [addr3] [addr2] [addr1] [addr0] [length]
-        addr_bytes = [
-            (address >> 24) & 0xFF,
-            (address >> 16) & 0xFF,
-            (address >> 8) & 0xFF,
-            address & 0xFF,
-            length
-        ]
-        
-        return self.send_command(CMD_READ_FLASH, addr_bytes)
-    
     @staticmethod
     def pad_to_4byte_boundary(data: bytes) -> bytes:
         """
@@ -641,13 +603,16 @@ class CANBootloaderFlash:
             data = data + b'\xFF' * padding_needed
         return data
     
-    def write_firmware(self, firmware_data: bytes, batch_size: int = 16) -> bool:
+    def write_firmware(self, firmware_data: bytes) -> bool:
         """
-        Write complete firmware to flash using 4-byte chunks with batched ACK checking.
+        Write complete firmware to flash using reliable 8-byte-aligned writes with retry.
+        
+        Sends two 4-byte CAN messages per 8-byte flash double-word. On any failure,
+        re-sets the write address (which resets the bootloader's write buffer) and
+        retries the full 8-byte pair to prevent buffer desync.
         
         Args:
-            firmware_data: Complete firmware binary (will be padded to 4-byte boundary)
-            batch_size: Number of 4-byte chunks to send before checking ACKs (default: 16 = 64 bytes)
+            firmware_data: Complete firmware binary (will be padded to 8-byte boundary)
         
         Returns:
             True if write successful
@@ -656,86 +621,95 @@ class CANBootloaderFlash:
         print("Writing firmware...")
         print("="*60)
         
+        # Pad to 8-byte boundary for flash double-word writes
+        while len(firmware_data) % 8 != 0:
+            firmware_data += b'\xFF'
+        
         total_bytes = len(firmware_data)
-        chunk_size = WRITE_CHUNK_SIZE  # 4 bytes per message
+        total_retries = 0
         
         print(f"Total size: {total_bytes} bytes ({total_bytes/1024:.2f} KB)")
-        print(f"Chunk size: {chunk_size} bytes per CAN message")
-        print(f"Batch size: {batch_size} chunks ({batch_size * chunk_size} bytes) before ACK check")
-        print("Bootloader buffers 2 chunks (8 bytes) before writing to flash")
+        print(f"Write method: 8 bytes per flash word (two 4-byte CAN messages)")
+        print(f"Retry limit: {MAX_RETRIES} per 8-byte word")
         print()
         
-        # Set initial address
-        if not self.set_address(APP_START_ADDRESS):
+        # Set initial address with retry
+        address_set = False
+        for attempt in range(MAX_RETRIES):
+            if self.set_address(APP_START_ADDRESS):
+                address_set = True
+                break
+            self.driver.clear_receive_queue()
+            time.sleep(0.05)
+        if not address_set:
             print("✗ Failed to set initial address")
             return False
         
-        # Write data in batches of 4-byte chunks
+        # Drain any stale messages before write loop
+        self.driver.clear_receive_queue()
+        
         start_time = time.time()
         last_progress = -1
         bytes_written = 0
-        chunks_in_batch = 0
         
         while bytes_written < total_bytes:
-            # Get next 4-byte chunk
-            chunk_end = min(bytes_written + chunk_size, total_bytes)
-            chunk = firmware_data[bytes_written:chunk_end]
+            # Extract 8-byte flash word (two 4-byte chunks)
+            word = firmware_data[bytes_written:bytes_written + 8]
+            chunk_a = word[0:4]
+            chunk_b = word[4:8]
             
-            # Ensure exactly 4 bytes (pad if needed for last chunk)
-            if len(chunk) < 4:
-                chunk = chunk + b'\xFF' * (4 - len(chunk))
+            success = False
+            for attempt in range(MAX_RETRIES):
+                # On retry, re-set address to reset bootloader's write buffer
+                if attempt > 0:
+                    total_retries += 1
+                    self.driver.clear_receive_queue()
+                    time.sleep(0.01)
+                    if not self.set_address(APP_START_ADDRESS + bytes_written):
+                        continue
+                
+                # Send first 4 bytes (bootloader buffers these)
+                if not self.write_4bytes(chunk_a):
+                    continue
+                
+                # Send second 4 bytes (triggers actual flash write on bootloader)
+                if not self.write_4bytes(chunk_b):
+                    continue
+                
+                success = True
+                break
             
-            # Send 4-byte chunk without waiting for ACK
-            is_last_chunk = (bytes_written + chunk_size >= total_bytes)
-            wait_for_ack = (chunks_in_batch >= batch_size - 1) or is_last_chunk
-            
-            if not self.write_4bytes(chunk, wait_ack=False):
-                print(f"\n✗ Write failed at offset 0x{bytes_written:08X}")
+            if not success:
+                print(f"\n✗ Write failed at offset 0x{bytes_written:08X} after {MAX_RETRIES} retries")
                 return False
             
-            bytes_written += len(chunk) if chunk_end != total_bytes or len(chunk) == 4 else (chunk_end - bytes_written)
-            chunks_in_batch += 1
+            bytes_written += 8
             
-            # Check batched ACKs when batch is full or at end
-            if wait_for_ack:
-                ack_count = self.read_pending_acks(chunks_in_batch, timeout=1.0)
-                if ack_count < 0:
-                    # NACK received
-                    print(f"\n✗ Write failed at offset 0x{bytes_written - chunks_in_batch * chunk_size:08X}")
-                    return False
-                elif ack_count != chunks_in_batch:
-                    print(f"\n✗ Expected {chunks_in_batch} ACKs, got {ack_count}")
-                    print(f"  Failed at offset 0x{bytes_written - chunks_in_batch * chunk_size:08X}")
-                    return False
-                chunks_in_batch = 0
-            
-            # Update progress every 128 bytes (32 messages)
+            # Update progress
             progress = int((bytes_written * 100) / total_bytes)
-            if bytes_written % 128 == 0 or bytes_written >= total_bytes:
-                if progress != last_progress:
-                    elapsed = time.time() - start_time
-                    speed = bytes_written / elapsed / 1024 if elapsed > 0 else 0
-                    eta = (total_bytes - bytes_written) / (bytes_written / elapsed) if elapsed > 0 and bytes_written > 0 else 0
-                    print(f"Progress: {progress:3d}% [{bytes_written}/{total_bytes} bytes] "
-                          f"Speed: {speed:.1f} KB/s ETA: {eta:.1f}s", end='\r')
-                    last_progress = progress
+            if progress != last_progress:
+                elapsed = time.time() - start_time
+                speed = bytes_written / elapsed / 1024 if elapsed > 0 else 0
+                eta = (total_bytes - bytes_written) / (bytes_written / elapsed) if elapsed > 0 and bytes_written > 0 else 0
+                print(f"\rProgress: {progress:3d}% [{bytes_written}/{total_bytes}] "
+                      f"Speed: {speed:.1f} KB/s ETA: {eta:.0f}s", end='')
+                last_progress = progress
         
         elapsed = time.time() - start_time
         avg_speed = total_bytes / elapsed / 1024 if elapsed > 0 else 0
-        print(f"\n\n✓ Firmware written successfully!")
+        retry_msg = f" ({total_retries} retries)" if total_retries > 0 else ""
+        print(f"\n\n✓ Firmware written successfully!{retry_msg}")
         print(f"  Total time: {elapsed:.1f}s")
         print(f"  Average speed: {avg_speed:.1f} KB/s\n")
         
         return True
     
-    def verify_flash(self, expected_data: bytes, batch_size: int = 8) -> bool:
+    def verify_flash(self, expected_data: bytes) -> bool:
         """
-        Verify flashed data by reading back and comparing.
-        Uses batched reads for improved performance.
+        Verify flashed data by reading back and comparing, one chunk at a time with retry.
         
         Args:
             expected_data: Expected binary data
-            batch_size: Number of read commands to send before reading responses (default: 8)
             
         Returns:
             True if verification successful
@@ -746,80 +720,58 @@ class CANBootloaderFlash:
         
         address = APP_START_ADDRESS
         bytes_verified = 0
-        chunk_size = 7  # Read 7 bytes at a time (max per CAN message)
+        chunk_size = 4  # Read 4 bytes at a time for reliability
+        total_retries = 0
         
         start_time = time.time()
         last_progress = -1
         
-        # Batched reading for speed
+        # Drain stale messages before verify
+        self.driver.clear_receive_queue()
+        
         while bytes_verified < len(expected_data):
-            # Determine batch of reads to send
-            batch_reads = []
-            batch_start = bytes_verified
-            current_address = address
+            remaining = len(expected_data) - bytes_verified
+            read_size = min(chunk_size, remaining)
             
-            # Build batch of read requests
-            for _ in range(batch_size):
-                if bytes_verified >= len(expected_data):
+            # Read with retry
+            read_bytes = None
+            for attempt in range(MAX_RETRIES):
+                if attempt > 0:
+                    total_retries += 1
+                    self.driver.clear_receive_queue()
+                    time.sleep(0.01)
+                
+                read_bytes = self.read_data(address, read_size)
+                if read_bytes is not None:
                     break
-                    
-                remaining = len(expected_data) - bytes_verified
-                read_size = min(chunk_size, remaining)
-                
-                batch_reads.append({
-                    'address': current_address,
-                    'size': read_size,
-                    'offset': bytes_verified
-                })
-                
-                bytes_verified += read_size
-                current_address += read_size
             
-            # Send all read commands without waiting
-            for read_info in batch_reads:
-                if not self.read_data_no_wait(read_info['address'], read_info['size']):
-                    print(f"\n✗ Failed to send read command at address 0x{read_info['address']:08X}")
-                    return False
+            if read_bytes is None:
+                print(f"\n✗ Failed to read at 0x{address:08X} after {MAX_RETRIES} retries")
+                return False
             
-            # Now read all responses
-            for read_info in batch_reads:
-                msg = self.wait_response(timeout=0.2)
-                
-                if not msg or len(msg.data) == 0:
-                    print(f"\n✗ Failed to read at address 0x{read_info['address']:08X}")
-                    return False
-                
-                if msg.data[0] != RESP_DATA:
-                    print(f"\n✗ Unexpected response at address 0x{read_info['address']:08X}")
-                    return False
-                
-                # Extract data (starts at byte 1)
-                read_data = bytes(msg.data[1:1+read_info['size']])
-                
-                # Compare
-                expected_chunk = expected_data[read_info['offset']:read_info['offset'] + read_info['size']]
-                
-                if read_data != expected_chunk:
-                    print(f"\n✗ Verification failed at address 0x{read_info['address']:08X}")
-                    print(f"  Expected: {expected_chunk.hex()}")
-                    print(f"  Read:     {read_data.hex()}")
-                    return False
+            # Compare
+            expected_chunk = expected_data[bytes_verified:bytes_verified + read_size]
+            if read_bytes != expected_chunk:
+                print(f"\n✗ Verification failed at address 0x{address:08X}")
+                print(f"  Expected: {expected_chunk.hex()}")
+                print(f"  Read:     {read_bytes.hex()}")
+                return False
             
-            # Update address for next batch
-            address = current_address
+            bytes_verified += read_size
+            address += read_size
             
             # Update progress
             progress = int((bytes_verified * 100) / len(expected_data))
-            if bytes_verified % 128 == 0 or bytes_verified >= len(expected_data):
-                if progress != last_progress:
-                    elapsed = time.time() - start_time
-                    speed = bytes_verified / elapsed / 1024 if elapsed > 0 else 0
-                    print(f"Verifying: {progress:3d}% [{bytes_verified}/{len(expected_data)} bytes] "
-                          f"Speed: {speed:.1f} KB/s", end='\r')
-                    last_progress = progress
+            if progress != last_progress:
+                elapsed = time.time() - start_time
+                speed = bytes_verified / elapsed / 1024 if elapsed > 0 else 0
+                print(f"\rVerifying: {progress:3d}% [{bytes_verified}/{len(expected_data)}] "
+                      f"Speed: {speed:.1f} KB/s", end='')
+                last_progress = progress
         
         elapsed = time.time() - start_time
-        print(f"\n\n✓ Verification successful ({bytes_verified} bytes)")
+        retry_msg = f" ({total_retries} retries)" if total_retries > 0 else ""
+        print(f"\n\n✓ Verification successful ({bytes_verified} bytes){retry_msg}")
         print(f"  Total time: {elapsed:.1f}s\n")
         
         return True
@@ -893,7 +845,7 @@ class CANBootloaderFlash:
             return False
     
     def flash_firmware(self, firmware_path: Path, verify: bool = True, 
-                      jump: bool = True, batch_size: int = 16) -> bool:
+                      jump: bool = True) -> bool:
         """
         Complete firmware flashing process.
         
@@ -901,7 +853,6 @@ class CANBootloaderFlash:
             firmware_path: Path to .bin file
             verify: Verify by reading back after writing (default: True)
             jump: Jump to application after flashing (default: True)
-            batch_size: Number of chunks to batch before checking ACKs (default: 16)
         
         Returns:
             True if flashing successful
@@ -944,13 +895,13 @@ class CANBootloaderFlash:
         if not self.erase_flash():
             return False
         
-        # Write firmware with batching
-        if not self.write_firmware(firmware_data, batch_size=batch_size):
+        # Write firmware
+        if not self.write_firmware(firmware_data):
             return False
         
-        # Verify by reading back (use same batch size for consistency)
+        # Verify by reading back
         if verify:
-            if not self.verify_flash(firmware_data, batch_size=batch_size):
+            if not self.verify_flash(firmware_data):
                 print("⚠ Warning: Flash verification failed")
                 return False
         
@@ -1002,8 +953,6 @@ Examples:
                        help='Only get bootloader status and exit')
     parser.add_argument('--list-devices', action='store_true',
                        help='List available CAN devices and exit')
-    parser.add_argument('--batch-size', type=int, default=16,
-                       help='Number of chunks to batch before checking responses for both write and verify (default: 16, higher=faster but less immediate error detection)')
 
     args = parser.parse_args()
 
@@ -1132,13 +1081,11 @@ Examples:
         print(f"CAN adapter:   {adapter_name}")
         print(f"Read-back verify: {'Yes' if args.verify else 'No'}")
         print(f"Jump to app:   {'Yes' if args.jump else 'No'}")
-        print(f"Batch size:    {args.batch_size} chunks ({args.batch_size * 4} bytes)")
         
         success = flasher.flash_firmware(
             firmware_path,
             verify=args.verify,
-            jump=args.jump,
-            batch_size=args.batch_size
+            jump=args.jump
         )
         
         if success:
