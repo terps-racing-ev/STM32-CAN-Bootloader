@@ -30,16 +30,343 @@ static volatile uint8_t jump_to_app_flag = 0;  /* Flag to trigger jump from main
 static volatile uint8_t can_command_received = 0;  /* Flag to disable auto-jump timeout */
 static uint32_t last_heartbeat_time = 0;  /* Last heartbeat timestamp for resetting on commands */
 static volatile uint8_t rx_msg_pending = 0;  /* Flag: message waiting for main loop processing */
+static BootMetadata_t boot_metadata;
+static uint8_t metadata_ready = 0;
+static uint8_t jump_target_bank = BOOT_BANK_INVALID;
+static uint32_t pending_image_crc = 0;
+static uint32_t pending_image_size = 0;
+static uint8_t pending_image_info_valid = 0;
+static uint8_t pending_verified_bank = BOOT_BANK_INVALID;
 
 /* Private function prototypes -----------------------------------------------*/
 static void Bootloader_ConfigureCANFilter(void);
-static uint8_t Bootloader_EraseApplicationFlash(void);
+static uint8_t Bootloader_EraseBank(uint8_t bank);
 static uint8_t Bootloader_WriteFlash(uint32_t address, uint8_t *data, uint16_t length);
 static uint8_t Bootloader_ReadFlash(uint32_t address, uint8_t *data, uint16_t length);
 static void Bootloader_DeInit(void);
 static void Bootloader_SendACK(void);
 static void Bootloader_SendNACK(uint8_t error_code);
 static void Bootloader_WaitForCANTransmission(void);
+static uint8_t Bootloader_ReadMetadata(BootMetadata_t *meta);
+static uint8_t Bootloader_WriteMetadata(const BootMetadata_t *meta);
+static void Bootloader_SetDefaultMetadata(BootMetadata_t *meta);
+static uint8_t Bootloader_GetActiveBank(void);
+static uint8_t Bootloader_GetInactiveBank(void);
+static uint32_t Bootloader_GetBankStartAddress(uint8_t bank);
+static uint32_t Bootloader_GetBankEndAddress(uint8_t bank);
+static uint8_t Bootloader_IsAddressInBank(uint32_t address, uint32_t length, uint8_t bank);
+static uint8_t Bootloader_IsAddressInAnyBank(uint32_t address, uint32_t length);
+static uint32_t Bootloader_ComputeCRC32(uint32_t start_address, uint32_t size);
+static uint8_t Bootloader_JumpToBank(uint8_t bank);
+static void Bootloader_FillReadyHeartbeatPayload(uint8_t code1, uint8_t code2);
+static uint8_t Bootloader_IsBankMarkedValid(uint8_t bank);
+static uint8_t Bootloader_IsBankCrcValid(uint8_t bank);
+static void Bootloader_InvalidateBankMetadata(uint8_t bank);
+static uint8_t Bootloader_IsUpdateInProgress(void);
+
+static uint8_t Bootloader_IsUpdateInProgress(void)
+{
+    if (!metadata_ready)
+    {
+        return 0;
+    }
+
+    return (boot_metadata.reserved0 == BOOT_METADATA_UPDATE_IN_PROGRESS) ? 1 : 0;
+}
+
+static void Bootloader_FillReadyHeartbeatPayload(uint8_t code1, uint8_t code2)
+{
+    uint8_t flags = 0;
+
+    if (Bootloader_GetActiveBank() == BOOT_BANK_B)
+    {
+        flags |= (1u << 0);
+    }
+    if (boot_metadata.bank_a_valid)
+    {
+        flags |= (1u << 1);
+    }
+    if (boot_metadata.bank_b_valid)
+    {
+        flags |= (1u << 2);
+    }
+    if (metadata_ready)
+    {
+        flags |= (1u << 3);
+    }
+    if (can_command_received)
+    {
+        flags |= (1u << 4);
+    }
+    if (pending_image_info_valid)
+    {
+        flags |= (1u << 5);
+    }
+    if (pending_verified_bank != BOOT_BANK_INVALID)
+    {
+        flags |= (1u << 6);
+    }
+    if (jump_to_app_flag)
+    {
+        flags |= (1u << 7);
+    }
+
+    memset(tx_data, 0, sizeof(tx_data));
+    tx_data[0] = RESP_READY;
+    tx_data[1] = code1;                                /* Version major or special marker */
+    tx_data[2] = code2;                                /* Version minor or special marker */
+    tx_data[3] = (uint8_t)bootloader_status.state;     /* Bootloader state */
+    tx_data[4] = bootloader_status.last_error;         /* Last error code */
+    tx_data[5] = flags;                                /* Active/valid bank and diagnostic flags */
+    tx_data[6] = (uint8_t)((bootloader_status.bytes_written >> 8) & 0xFF);
+    tx_data[7] = (uint8_t)(bootloader_status.bytes_written & 0xFF);
+}
+
+static uint8_t Bootloader_ReadMetadata(BootMetadata_t *meta)
+{
+    const BootMetadata_t *flash_meta = (const BootMetadata_t *)BOOT_METADATA_ADDRESS;
+
+    memcpy(meta, flash_meta, sizeof(BootMetadata_t));
+
+    if (meta->magic != BOOT_METADATA_MAGIC)
+    {
+        return 0;
+    }
+
+    if (meta->complement != ~BOOT_METADATA_MAGIC)
+    {
+        return 0;
+    }
+
+    if (meta->active_bank != BOOT_BANK_A && meta->active_bank != BOOT_BANK_B)
+    {
+        return 0;
+    }
+
+    if (meta->bank_a_size > BANK_SIZE || meta->bank_b_size > BANK_SIZE)
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
+static void Bootloader_SetDefaultMetadata(BootMetadata_t *meta)
+{
+    memset(meta, 0, sizeof(BootMetadata_t));
+
+    meta->magic = BOOT_METADATA_MAGIC;
+    meta->active_bank = BOOT_BANK_A;
+    meta->bank_a_valid = 0;
+    meta->bank_b_valid = 0;
+    meta->reserved0 = BOOT_METADATA_UPDATE_IDLE;
+    meta->complement = ~BOOT_METADATA_MAGIC;
+}
+
+static uint8_t Bootloader_WriteMetadata(const BootMetadata_t *meta)
+{
+    FLASH_EraseInitTypeDef erase_init;
+    HAL_StatusTypeDef status;
+    uint32_t page_error;
+
+    HAL_FLASH_Unlock();
+    __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
+
+    erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
+    erase_init.Banks = FLASH_BANK_1;
+    erase_init.Page = BOOT_METADATA_PAGE;
+    erase_init.NbPages = 1;
+
+    status = HAL_FLASHEx_Erase(&erase_init, &page_error);
+    if (status != HAL_OK)
+    {
+        HAL_FLASH_Lock();
+        return ERR_FLASH_ERASE_FAILED;
+    }
+
+    for (uint32_t i = 0; i < sizeof(BootMetadata_t); i += 8)
+    {
+        uint64_t data64 = 0;
+        memcpy(&data64, ((const uint8_t *)meta) + i, 8);
+
+        status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, BOOT_METADATA_ADDRESS + i, data64);
+        if (status != HAL_OK)
+        {
+            HAL_FLASH_Lock();
+            return ERR_FLASH_WRITE_FAILED;
+        }
+    }
+
+    HAL_FLASH_Lock();
+    return ERR_NONE;
+}
+
+static uint32_t Bootloader_GetBankStartAddress(uint8_t bank)
+{
+    return (bank == BOOT_BANK_B) ? BANK_B_ADDRESS : BANK_A_ADDRESS;
+}
+
+static uint32_t Bootloader_GetBankEndAddress(uint8_t bank)
+{
+    return (bank == BOOT_BANK_B) ? BANK_B_END_ADDRESS : BANK_A_END_ADDRESS;
+}
+
+static uint8_t Bootloader_GetActiveBank(void)
+{
+    if (!metadata_ready)
+    {
+        return BOOT_BANK_A;
+    }
+    return boot_metadata.active_bank;
+}
+
+static uint8_t Bootloader_GetInactiveBank(void)
+{
+    return (Bootloader_GetActiveBank() == BOOT_BANK_A) ? BOOT_BANK_B : BOOT_BANK_A;
+}
+
+static uint8_t Bootloader_IsAddressInBank(uint32_t address, uint32_t length, uint8_t bank)
+{
+    uint32_t bank_start = Bootloader_GetBankStartAddress(bank);
+    uint32_t bank_end = Bootloader_GetBankEndAddress(bank);
+
+    if (length == 0)
+    {
+        return 0;
+    }
+
+    if (address < bank_start || address > bank_end)
+    {
+        return 0;
+    }
+
+    if ((address + length - 1) > bank_end)
+    {
+        return 0;
+    }
+
+    return 1;
+}
+
+static uint8_t Bootloader_IsAddressInAnyBank(uint32_t address, uint32_t length)
+{
+    return Bootloader_IsAddressInBank(address, length, BOOT_BANK_A) ||
+           Bootloader_IsAddressInBank(address, length, BOOT_BANK_B);
+}
+
+static uint32_t Bootloader_ComputeCRC32(uint32_t start_address, uint32_t size)
+{
+    uint32_t crc = 0xFFFFFFFFu;
+    const uint8_t *data = (const uint8_t *)start_address;
+
+    for (uint32_t i = 0; i < size; i++)
+    {
+        crc ^= data[i];
+        for (uint8_t bit = 0; bit < 8; bit++)
+        {
+            if (crc & 1u)
+            {
+                crc = (crc >> 1) ^ 0xEDB88320u;
+            }
+            else
+            {
+                crc >>= 1;
+            }
+        }
+    }
+
+    return ~crc;
+}
+
+static uint8_t Bootloader_IsBankMarkedValid(uint8_t bank)
+{
+    if (!metadata_ready)
+    {
+        return 0;
+    }
+
+    if (bank == BOOT_BANK_A)
+    {
+        return boot_metadata.bank_a_valid && (boot_metadata.bank_a_size > 0) && (boot_metadata.bank_a_size <= BANK_SIZE);
+    }
+
+    if (bank == BOOT_BANK_B)
+    {
+        return boot_metadata.bank_b_valid && (boot_metadata.bank_b_size > 0) && (boot_metadata.bank_b_size <= BANK_SIZE);
+    }
+
+    return 0;
+}
+
+static uint8_t Bootloader_IsBankCrcValid(uint8_t bank)
+{
+    uint32_t expected_crc;
+    uint32_t image_size;
+    uint32_t bank_start;
+    uint32_t computed_crc;
+
+    if (!Bootloader_IsBankMarkedValid(bank))
+    {
+        return 0;
+    }
+
+    if (bank == BOOT_BANK_A)
+    {
+        expected_crc = boot_metadata.bank_a_crc;
+        image_size = boot_metadata.bank_a_size;
+    }
+    else if (bank == BOOT_BANK_B)
+    {
+        expected_crc = boot_metadata.bank_b_crc;
+        image_size = boot_metadata.bank_b_size;
+    }
+    else
+    {
+        return 0;
+    }
+
+    bank_start = Bootloader_GetBankStartAddress(bank);
+    computed_crc = Bootloader_ComputeCRC32(bank_start, image_size);
+
+    return (computed_crc == expected_crc) ? 1 : 0;
+}
+
+static void Bootloader_InvalidateBankMetadata(uint8_t bank)
+{
+    uint8_t changed = 0;
+
+    if (!metadata_ready)
+    {
+        return;
+    }
+
+    if (bank == BOOT_BANK_A)
+    {
+        if (boot_metadata.bank_a_valid || boot_metadata.bank_a_crc || boot_metadata.bank_a_size)
+        {
+            boot_metadata.bank_a_valid = 0;
+            boot_metadata.bank_a_crc = 0;
+            boot_metadata.bank_a_size = 0;
+            changed = 1;
+        }
+    }
+    else if (bank == BOOT_BANK_B)
+    {
+        if (boot_metadata.bank_b_valid || boot_metadata.bank_b_crc || boot_metadata.bank_b_size)
+        {
+            boot_metadata.bank_b_valid = 0;
+            boot_metadata.bank_b_crc = 0;
+            boot_metadata.bank_b_size = 0;
+            changed = 1;
+        }
+    }
+
+    if (changed)
+    {
+        (void)Bootloader_WriteMetadata(&boot_metadata);
+        Bootloader_LED_UpdateStatus();
+    }
+}
 
 /**
   * @brief  Initialize the bootloader
@@ -48,12 +375,25 @@ static void Bootloader_WaitForCANTransmission(void);
   */
 void Bootloader_Init(CAN_HandleTypeDef *hcan)
 {
+    uint8_t metadata_valid;
+
     hcan_bootloader = hcan;
     
     /* Initialize bootloader status */
     memset(&bootloader_status, 0, sizeof(BootloaderStatus_t));
     bootloader_status.state = BL_STATE_IDLE;
-    bootloader_status.current_address = APPLICATION_ADDRESS;
+    bootloader_status.current_address = BANK_A_ADDRESS;
+
+    metadata_valid = Bootloader_ReadMetadata(&boot_metadata);
+    if (!metadata_valid)
+    {
+        Bootloader_SetDefaultMetadata(&boot_metadata);
+        /* Bank validity is host-authoritative and may only be set after
+         * explicit verified update flow (CMD_SET_IMAGE_INFO/CMD_VERIFY_BANK/CMD_JUMP_TO_APP).
+         * Do not infer validity from flash contents at startup. */
+        Bootloader_WriteMetadata(&boot_metadata);
+    }
+    metadata_ready = 1;
     
     /* Configure CAN filter */
     Bootloader_ConfigureCANFilter();
@@ -135,11 +475,9 @@ void Bootloader_Main(void)
     /* Initialize the static heartbeat time variable */
     last_heartbeat_time = last_heartbeat;
     
-    /* Send ready message */
-    tx_data[0] = RESP_READY;
-    tx_data[1] = 0x01;  /* Bootloader version */
-    tx_data[2] = 0x00;  /* Bootloader subversion */
-    Bootloader_SendCANMessage(RESP_READY, tx_data, 3);
+    /* Send startup diagnostic heartbeat frame. */
+    Bootloader_FillReadyHeartbeatPayload(0x01, 0x00);
+    Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
     
     /* Main bootloader loop with timeout */
     while (1)
@@ -158,30 +496,47 @@ void Bootloader_Main(void)
         if (bootloader_status.state == BL_STATE_IDLE && 
             (HAL_GetTick() - last_heartbeat) >= HEARTBEAT_INTERVAL_MS)
         {
-            /* Send ready/heartbeat message */
-            tx_data[0] = RESP_READY;
-            tx_data[1] = 0x01;  /* Bootloader version */
-            tx_data[2] = 0x00;  /* Bootloader subversion */
-            Bootloader_SendCANMessage(RESP_READY, tx_data, 3);
+            /* Send periodic diagnostic heartbeat. */
+            Bootloader_FillReadyHeartbeatPayload(0x01, 0x00);
+            Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
             last_heartbeat = HAL_GetTick();
             last_heartbeat_time = last_heartbeat;  /* Update static variable */
         }
         
         /* Check for timeout to auto-jump to application */
-        /* Only auto-jump if: timeout expired AND no CAN commands received AND valid app exists */
         if (!timeout_expired && !can_command_received &&
             (HAL_GetTick() - timeout_start >= BOOTLOADER_TIMEOUT_MS))
         {
             timeout_expired = 1;
 
-            /* Only jump if we have a valid application flag set */
-            if (Bootloader_CheckApplicationValidFlag())
+            uint8_t active_bank = Bootloader_GetActiveBank();
+            uint8_t fallback_bank = Bootloader_GetInactiveBank();
+
+            if (Bootloader_IsUpdateInProgress())
             {
-                /* Send timeout jump message */
-                tx_data[0] = RESP_READY;
-                tx_data[1] = 0xAA;  /* Special: Timeout auto-jump */
-                tx_data[2] = 0x55;
-                Bootloader_SendCANMessage(RESP_READY, tx_data, 3);
+                /* Interrupted update recovery: only boot the currently active bank,
+                 * and only if metadata/CRC/vector checks all pass. */
+                if (Bootloader_IsBankMarkedValid(active_bank) &&
+                    Bootloader_IsBankCrcValid(active_bank) &&
+                    Bootloader_CheckValidApplication(active_bank))
+                {
+                    Bootloader_FillReadyHeartbeatPayload(0xA5, 0x5A);
+                    Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
+                    Bootloader_WaitForCANTransmission();
+                    HAL_Delay(10);
+                    Bootloader_LED_BlinkBeforeJump();
+                    Bootloader_JumpToBank(active_bank);
+                }
+
+                /* If active bank is not valid/verified, stay in bootloader for recovery. */
+                continue;
+            }
+
+            if (Bootloader_CheckValidApplication(active_bank))
+            {
+                /* Send timeout jump diagnostic frame. */
+                Bootloader_FillReadyHeartbeatPayload(0xAA, 0x55);
+                Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
 
                 /* Wait for message to send */
                 Bootloader_WaitForCANTransmission();
@@ -191,7 +546,14 @@ void Bootloader_Main(void)
                 Bootloader_LED_BlinkBeforeJump();
 
                 /* Jump to application */
-                Bootloader_JumpToApplication();
+                Bootloader_JumpToBank(active_bank);
+            }
+            else if (Bootloader_CheckValidApplication(fallback_bank))
+            {
+                /* Allow fallback boot for recoverability, but do not mutate
+                 * validity metadata outside the verified flashing flow. */
+                Bootloader_LED_BlinkBeforeJump();
+                Bootloader_JumpToBank(fallback_bank);
             }
             /* If no valid app, stay in bootloader mode indefinitely */
         }
@@ -199,11 +561,9 @@ void Bootloader_Main(void)
         /* Check if we should jump to application (from CAN command) */
         if (jump_to_app_flag)
         {
-            /* Send a pre-jump indicator message (using READY with special code) */
-            tx_data[0] = RESP_READY;
-            tx_data[1] = 0xFF;  /* Special: About to jump */
-            tx_data[2] = 0xFF;
-            Bootloader_SendCANMessage(RESP_READY, tx_data, 3);
+            /* Send pre-jump diagnostic frame. */
+            Bootloader_FillReadyHeartbeatPayload(0xFF, 0xFF);
+            Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
             
             /* Wait for this message to be sent */
             Bootloader_WaitForCANTransmission();
@@ -212,7 +572,11 @@ void Bootloader_Main(void)
             Bootloader_LED_BlinkBeforeJump();
             
             /* Jump to application (this function should not return) */
-            Bootloader_JumpToApplication();
+            if (jump_target_bank == BOOT_BANK_INVALID)
+            {
+                jump_target_bank = Bootloader_GetActiveBank();
+            }
+            Bootloader_JumpToBank(jump_target_bank);
             
             /* If we get here, jump failed - reset the flag */
             jump_to_app_flag = 0;
@@ -238,6 +602,8 @@ void Bootloader_ProcessCANMessage(void)
     uint32_t address;
     uint16_t length;
     uint8_t result;
+    uint8_t active_bank;
+    uint8_t inactive_bank;
 
     /* Mark that a CAN command has been received - disable auto-jump timeout */
     can_command_received = 1;
@@ -250,6 +616,8 @@ void Bootloader_ProcessCANMessage(void)
 
     /* Get the command byte */
     command = rx_data[0];
+    active_bank = Bootloader_GetActiveBank();
+    inactive_bank = Bootloader_GetInactiveBank();
 
     switch (command)
     {
@@ -266,20 +634,16 @@ void Bootloader_ProcessCANMessage(void)
             break;
             
         case CMD_ERASE_FLASH:
-            /* Erase application flash area */
+            /* Erase inactive application bank */
             bootloader_status.state = BL_STATE_ERASING;
-            
-            /* Clear the application valid flag first */
-            Bootloader_ClearApplicationValidFlag();
-            
-            /* Update LED2 since we cleared the valid flag */
-            Bootloader_LED_UpdateStatus();
-            
-            result = Bootloader_EraseApplicationFlash();
+
+            result = Bootloader_EraseBank(inactive_bank);
             if (result == ERR_NONE)
             {
                 bootloader_status.bytes_written = 0;
-                bootloader_status.current_address = APPLICATION_ADDRESS;
+                bootloader_status.current_address = Bootloader_GetBankStartAddress(inactive_bank);
+                pending_image_info_valid = 0;
+                pending_verified_bank = BOOT_BANK_INVALID;
                 Bootloader_SendACK();
             }
             else
@@ -294,8 +658,7 @@ void Bootloader_ProcessCANMessage(void)
             address = (rx_data[1] << 24) | (rx_data[2] << 16) |
                      (rx_data[3] << 8) | rx_data[4];
 
-            /* Validate address is in application area (not in permanent storage) */
-            if (address >= APPLICATION_ADDRESS && address <= APPLICATION_END_ADDRESS)
+            if (Bootloader_IsAddressInBank(address, 1, inactive_bank))
             {
                 bootloader_status.current_address = address;
                 buffer_index = 0;  /* Reset buffer */
@@ -361,7 +724,7 @@ void Bootloader_ProcessCANMessage(void)
             length = rx_data[5];
 
             /* Validate address is in application area (not in permanent storage) */
-            if (address >= APPLICATION_ADDRESS && address <= APPLICATION_END_ADDRESS)
+            if (Bootloader_IsAddressInBank(address, length, inactive_bank))
             {
                 bootloader_status.state = BL_STATE_WRITING;
                 result = Bootloader_WriteFlash(address, &rx_data[6], length);
@@ -387,8 +750,7 @@ void Bootloader_ProcessCANMessage(void)
                      (rx_data[3] << 8) | rx_data[4];
             length = rx_data[5];
 
-            /* Allow reading from application area only (not permanent storage during flash ops) */
-            if (address >= APPLICATION_ADDRESS && address <= APPLICATION_END_ADDRESS && length <= 7)
+            if (Bootloader_IsAddressInAnyBank(address, length) && length <= 7)
             {
                 bootloader_status.state = BL_STATE_READING;
                 tx_data[0] = RESP_DATA;
@@ -408,19 +770,110 @@ void Bootloader_ProcessCANMessage(void)
                 Bootloader_SendNACK(ERR_INVALID_ADDRESS);
             }
             break;
+
+        case CMD_GET_ACTIVE_BANK:
+            tx_data[0] = RESP_DATA;
+            tx_data[1] = active_bank;
+            tx_data[2] = boot_metadata.bank_a_valid;
+            tx_data[3] = boot_metadata.bank_b_valid;
+            tx_data[4] = (BANK_SIZE >> 16) & 0xFF;
+            tx_data[5] = (BANK_SIZE >> 8) & 0xFF;
+            tx_data[6] = BANK_SIZE & 0xFF;
+            tx_data[7] = 1; /* Metadata format version */
+            Bootloader_SendCANMessage(RESP_DATA, tx_data, 8);
+            break;
+
+        case CMD_SET_IMAGE_INFO:
+            pending_image_crc = ((uint32_t)rx_data[1] << 24) |
+                                ((uint32_t)rx_data[2] << 16) |
+                                ((uint32_t)rx_data[3] << 8) |
+                                 (uint32_t)rx_data[4];
+            pending_image_size = ((uint32_t)rx_data[5] << 16) |
+                                 ((uint32_t)rx_data[6] << 8) |
+                                  (uint32_t)rx_data[7];
+
+            if (pending_image_size == 0 || pending_image_size > BANK_SIZE)
+            {
+                pending_image_info_valid = 0;
+                pending_verified_bank = BOOT_BANK_INVALID;
+                Bootloader_SendNACK(ERR_INVALID_DATA_LENGTH);
+            }
+            else
+            {
+                pending_image_info_valid = 1;
+                pending_verified_bank = BOOT_BANK_INVALID;
+                Bootloader_SendACK();
+            }
+            break;
+
+        case CMD_VERIFY_BANK:
+            if (!pending_image_info_valid)
+            {
+                Bootloader_SendNACK(ERR_INVALID_DATA_LENGTH);
+                break;
+            }
+
+            bootloader_status.state = BL_STATE_VERIFYING;
+            {
+                uint32_t verify_start = Bootloader_GetBankStartAddress(inactive_bank);
+                uint32_t computed_crc = Bootloader_ComputeCRC32(verify_start, pending_image_size);
+
+                if (computed_crc == pending_image_crc)
+                {
+                    pending_verified_bank = inactive_bank;
+                    Bootloader_SendACK();
+                }
+                else
+                {
+                    pending_verified_bank = BOOT_BANK_INVALID;
+                    Bootloader_SendNACK(ERR_CRC_MISMATCH);
+                }
+            }
+            bootloader_status.state = BL_STATE_IDLE;
+            break;
             
         case CMD_JUMP_TO_APP:
             /* Jump to application - set flag to jump from main loop, not from interrupt */
-            if (Bootloader_CheckValidApplication())
+            jump_target_bank = active_bank;
+
+            if (pending_image_info_valid && pending_verified_bank == inactive_bank)
             {
-                /* Set the valid application flag in flash for future auto-boots */
-                result = Bootloader_SetApplicationValidFlag();
+                boot_metadata.active_bank = inactive_bank;
+                if (inactive_bank == BOOT_BANK_A)
+                {
+                    boot_metadata.bank_a_valid = 1;
+                    boot_metadata.bank_a_crc = pending_image_crc;
+                    boot_metadata.bank_a_size = pending_image_size;
+                    boot_metadata.bank_b_valid = 0;
+                    boot_metadata.bank_b_crc = 0;
+                    boot_metadata.bank_b_size = 0;
+                }
+                else
+                {
+                    boot_metadata.bank_b_valid = 1;
+                    boot_metadata.bank_b_crc = pending_image_crc;
+                    boot_metadata.bank_b_size = pending_image_size;
+                    boot_metadata.bank_a_valid = 0;
+                    boot_metadata.bank_a_crc = 0;
+                    boot_metadata.bank_a_size = 0;
+                }
+
+                boot_metadata.reserved0 = BOOT_METADATA_UPDATE_IDLE;
+
+                result = Bootloader_WriteMetadata(&boot_metadata);
                 if (result != ERR_NONE)
                 {
-                    /* Log error but still try to jump - flag write failure shouldn't prevent immediate jump */
-                    bootloader_status.last_error = result;
+                    Bootloader_SendNACK(result);
+                    break;
                 }
-                
+
+                jump_target_bank = inactive_bank;
+                pending_image_info_valid = 0;
+                pending_verified_bank = BOOT_BANK_INVALID;
+            }
+
+            if (Bootloader_CheckValidApplication(jump_target_bank))
+            {
                 /* Update LED2 to show valid application */
                 Bootloader_LED_UpdateStatus();
                 
@@ -441,18 +894,17 @@ void Bootloader_ProcessCANMessage(void)
 }
 
 /**
-  * @brief  Erase application flash area
+    * @brief  Erase selected application bank
   * @retval Error code
   */
-static uint8_t Bootloader_EraseApplicationFlash(void)
+static uint8_t Bootloader_EraseBank(uint8_t bank)
 {
     FLASH_EraseInitTypeDef erase_init;
     uint32_t page_error;
     HAL_StatusTypeDef status;
-    
-    /* Calculate first and last pages for application */
-    uint32_t first_page = (APPLICATION_ADDRESS - 0x08000000) / FLASH_PAGE_SIZE;
-    uint32_t num_pages = APPLICATION_SIZE / FLASH_PAGE_SIZE;
+        uint32_t bank_start = Bootloader_GetBankStartAddress(bank);
+        uint32_t first_page = (bank_start - 0x08000000u) / FLASH_PAGE_SIZE;
+        uint32_t num_pages = BANK_SIZE / FLASH_PAGE_SIZE;
     
     /* Unlock flash */
     HAL_FLASH_Unlock();
@@ -482,6 +934,29 @@ static uint8_t Bootloader_EraseApplicationFlash(void)
     
     /* Lock flash */
     HAL_FLASH_Lock();
+
+    boot_metadata.reserved0 = BOOT_METADATA_UPDATE_IN_PROGRESS;
+
+    if (bank == BOOT_BANK_A)
+    {
+        boot_metadata.bank_a_valid = 0;
+        boot_metadata.bank_a_crc = 0;
+        boot_metadata.bank_a_size = 0;
+    }
+    else
+    {
+        boot_metadata.bank_b_valid = 0;
+        boot_metadata.bank_b_crc = 0;
+        boot_metadata.bank_b_size = 0;
+    }
+
+    if (Bootloader_WriteMetadata(&boot_metadata) != ERR_NONE)
+    {
+        bootloader_status.last_error = ERR_FLASH_WRITE_FAILED;
+        return ERR_FLASH_WRITE_FAILED;
+    }
+
+    Bootloader_LED_UpdateStatus();
     
     bootloader_status.last_error = ERR_NONE;
     return ERR_NONE;
@@ -500,15 +975,8 @@ static uint8_t Bootloader_WriteFlash(uint32_t address, uint8_t *data, uint16_t l
     uint32_t i;
     uint64_t data64;
 
-    /* Validate parameters - protect permanent storage area */
-    if (address < APPLICATION_ADDRESS || address > APPLICATION_END_ADDRESS)
-    {
-        bootloader_status.last_error = ERR_INVALID_ADDRESS;
-        return ERR_INVALID_ADDRESS;
-    }
-
-    /* Ensure write doesn't overflow into permanent storage */
-    if ((address + length - 1) > APPLICATION_END_ADDRESS)
+    /* Writes are allowed only in the inactive bank */
+    if (!Bootloader_IsAddressInBank(address, length, Bootloader_GetInactiveBank()))
     {
         bootloader_status.last_error = ERR_INVALID_ADDRESS;
         return ERR_INVALID_ADDRESS;
@@ -573,14 +1041,7 @@ static uint8_t Bootloader_ReadFlash(uint32_t address, uint8_t *data, uint16_t le
     uint16_t i;
     uint8_t *flash_ptr = (uint8_t *)address;
 
-    /* Validate address - protect permanent storage area */
-    if (address < APPLICATION_ADDRESS || address > APPLICATION_END_ADDRESS)
-    {
-        return ERR_INVALID_ADDRESS;
-    }
-
-    /* Ensure read doesn't overflow into permanent storage */
-    if ((address + length - 1) > APPLICATION_END_ADDRESS)
+    if (!Bootloader_IsAddressInAnyBank(address, length))
     {
         return ERR_INVALID_ADDRESS;
     }
@@ -598,10 +1059,11 @@ static uint8_t Bootloader_ReadFlash(uint32_t address, uint8_t *data, uint16_t le
   * @brief  Check if valid application exists
   * @retval 1 if valid application, 0 otherwise
   */
-uint8_t Bootloader_CheckValidApplication(void)
+uint8_t Bootloader_CheckValidApplication(uint8_t bank)
 {
-    uint32_t stack_pointer = *(__IO uint32_t *)APPLICATION_ADDRESS;
-    uint32_t reset_handler = *(__IO uint32_t *)(APPLICATION_ADDRESS + 4);
+    uint32_t app_base = Bootloader_GetBankStartAddress(bank);
+    uint32_t stack_pointer = *(__IO uint32_t *)app_base;
+    uint32_t reset_handler = *(__IO uint32_t *)(app_base + 4);
     
     /* Check if stack pointer is in valid RAM range */
     if ((stack_pointer & 0xFFF00000) != 0x20000000)
@@ -624,6 +1086,9 @@ uint8_t Bootloader_CheckValidApplication(void)
   */
 static void Bootloader_DeInit(void)
 {
+    /* Prevent new interrupts while tearing down the bootloader context. */
+    __disable_irq();
+
     /* Turn off and de-initialize LED */
     HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_RESET);
     HAL_GPIO_DeInit(LED_PORT, LED_PIN);
@@ -637,14 +1102,17 @@ static void Bootloader_DeInit(void)
     SysTick->CTRL = 0;
     SysTick->LOAD = 0;
     SysTick->VAL = 0;
-    
-    /* Disable all interrupts */
-    __disable_irq();
-    
-    /* Disable all peripheral clocks */
-    __HAL_RCC_GPIOA_CLK_DISABLE();
-    __HAL_RCC_GPIOB_CLK_DISABLE();
-    __HAL_RCC_CAN1_CLK_DISABLE();
+
+    /* Disable and clear all NVIC interrupts to mimic a reset-like handoff. */
+    for (uint32_t i = 0; i < 8; i++)
+    {
+        NVIC->ICER[i] = 0xFFFFFFFFu;
+        NVIC->ICPR[i] = 0xFFFFFFFFu;
+    }
+
+    /* Reset clock tree / HAL state before handing control to the application. */
+    HAL_RCC_DeInit();
+    HAL_DeInit();
 }
 
 /**
@@ -669,7 +1137,7 @@ static void Bootloader_WaitForCANTransmission(void)
   * @brief  Jump to application
   * @retval Error code (if returns, jump failed)
   */
-uint8_t Bootloader_JumpToApplication(void)
+static uint8_t Bootloader_JumpToBank(uint8_t bank)
 {
     typedef void (*pFunction)(void);
     pFunction jump_to_application;
@@ -678,14 +1146,28 @@ uint8_t Bootloader_JumpToApplication(void)
     uint8_t jump_info[8];
     
     /* Check if valid application exists */
-    if (!Bootloader_CheckValidApplication())
+    uint32_t app_base = Bootloader_GetBankStartAddress(bank);
+
+    if (!Bootloader_IsBankMarkedValid(bank))
     {
+        return ERR_NO_VALID_APP;
+    }
+
+    if (!Bootloader_IsBankCrcValid(bank))
+    {
+        Bootloader_InvalidateBankMetadata(bank);
+        return ERR_CRC_MISMATCH;
+    }
+
+    if (!Bootloader_CheckValidApplication(bank))
+    {
+        Bootloader_InvalidateBankMetadata(bank);
         return ERR_NO_VALID_APP;
     }
     
     /* Read application vector table */
-    app_stack_pointer = *(__IO uint32_t *)APPLICATION_ADDRESS;
-    jump_address = *(__IO uint32_t *)(APPLICATION_ADDRESS + 4);
+    app_stack_pointer = *(__IO uint32_t *)app_base;
+    jump_address = *(__IO uint32_t *)(app_base + 4);
     
     /* Send detailed jump information before jumping */
     jump_info[0] = RESP_JUMP_INFO;
@@ -708,19 +1190,31 @@ uint8_t Bootloader_JumpToApplication(void)
     Bootloader_DeInit();
     
     /* Get the application stack pointer */
+    __set_CONTROL(0);
     __set_MSP(app_stack_pointer);
     
     /* Cast to function pointer */
     jump_to_application = (pFunction)jump_address;
     
     /* Relocate vector table */
-    SCB->VTOR = APPLICATION_ADDRESS;
+    SCB->VTOR = app_base;
+
+    __DSB();
+    __ISB();
+
+    /* Enter the application with interrupts unmasked; startup code can manage them. */
+    __enable_irq();
     
     /* Jump to application */
     jump_to_application();
     
     /* Should never reach here */
     return ERR_NONE;
+}
+
+uint8_t Bootloader_JumpToApplication(void)
+{
+    return Bootloader_JumpToBank(Bootloader_GetActiveBank());
 }
 
 /**
@@ -756,6 +1250,8 @@ static void Bootloader_SendNACK(uint8_t error_code)
   */
 void Bootloader_SendCANMessage(uint8_t cmd, uint8_t *data, uint8_t length)
 {
+        (void)cmd;
+
     uint8_t i;
     uint8_t tx_buffer[8] = {0};
     uint32_t timeout;
@@ -781,93 +1277,6 @@ void Bootloader_SendCANMessage(uint8_t cmd, uint8_t *data, uint8_t length)
 }
 
 /**
-  * @brief  Set application valid flag in flash
-  * @retval ERR_NONE if successful, error code otherwise
-  */
-uint8_t Bootloader_SetApplicationValidFlag(void)
-{
-    HAL_StatusTypeDef status;
-    uint32_t magic_data[2];
-    
-    magic_data[0] = APP_VALID_MAGIC_NUMBER;
-    magic_data[1] = APP_VALID_FLAG_COMPLEMENT;
-    
-    /* Unlock flash */
-    HAL_FLASH_Unlock();
-    
-    /* Erase the page containing the flag (Page 15 - last page of bootloader) */
-    FLASH_EraseInitTypeDef erase_init;
-    uint32_t page_error;
-    
-    erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
-    erase_init.Page = (APP_VALID_FLAG_ADDRESS - 0x08000000) / FLASH_PAGE_SIZE;  /* Page 15: contains APP_VALID_FLAG_ADDRESS (0x08007FF8) */
-    erase_init.NbPages = 1;
-    
-    status = HAL_FLASHEx_Erase(&erase_init, &page_error);
-    if (status != HAL_OK)
-    {
-        HAL_FLASH_Lock();
-        return ERR_FLASH_ERASE_FAILED;
-    }
-    
-    /* Write magic number (first 4 bytes) */
-    status = HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, APP_VALID_FLAG_ADDRESS, 
-                                *((uint64_t*)magic_data));
-    
-    if (status != HAL_OK)
-    {
-        HAL_FLASH_Lock();
-        return ERR_FLASH_WRITE_FAILED;
-    }
-    
-    /* Lock flash */
-    HAL_FLASH_Lock();
-    
-    return ERR_NONE;
-}
-
-/**
-  * @brief  Check if application valid flag is set
-  * @retval 1 if valid, 0 if not valid
-  */
-uint8_t Bootloader_CheckApplicationValidFlag(void)
-{
-    uint32_t *flag_ptr = (uint32_t *)APP_VALID_FLAG_ADDRESS;
-    
-    /* Check if both magic number and complement are present */
-    if (flag_ptr[0] == APP_VALID_MAGIC_NUMBER && 
-        flag_ptr[1] == APP_VALID_FLAG_COMPLEMENT)
-    {
-        return 1;  /* Valid flag found */
-    }
-    
-    return 0;  /* No valid flag */
-}
-
-/**
-  * @brief  Clear application valid flag
-  * @retval None
-  */
-void Bootloader_ClearApplicationValidFlag(void)
-{
-    FLASH_EraseInitTypeDef erase_init;
-    uint32_t page_error;
-    
-    /* Unlock flash */
-    HAL_FLASH_Unlock();
-    
-    /* Erase the page containing the flag */
-    erase_init.TypeErase = FLASH_TYPEERASE_PAGES;
-    erase_init.Page = (APP_VALID_FLAG_ADDRESS - 0x08000000) / FLASH_PAGE_SIZE;  /* Page 15: contains APP_VALID_FLAG_ADDRESS */
-    erase_init.NbPages = 1;
-    
-    HAL_FLASHEx_Erase(&erase_init, &page_error);
-    
-    /* Lock flash */
-    HAL_FLASH_Lock();
-}
-
-/**
   * @brief  Initialize LED debug indicators
   * @retval None
   */
@@ -887,8 +1296,10 @@ void Bootloader_LED_Init(void)
   */
 void Bootloader_LED_UpdateStatus(void)
 {
-    /* LED2 indicates if valid application exists */
-    if (Bootloader_CheckApplicationValidFlag())
+    uint8_t active_bank = Bootloader_GetActiveBank();
+    uint8_t valid_active = (active_bank == BOOT_BANK_A) ? boot_metadata.bank_a_valid : boot_metadata.bank_b_valid;
+
+    if (valid_active)
     {
         LED2_ON();
     }

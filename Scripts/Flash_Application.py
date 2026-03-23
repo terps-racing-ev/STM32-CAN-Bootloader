@@ -21,6 +21,7 @@ Date: October 15, 2025
 import sys
 import time
 import argparse
+import binascii
 from pathlib import Path
 from typing import Optional, Tuple, Union
 from dataclasses import dataclass
@@ -189,6 +190,9 @@ CMD_JUMP_TO_APP = 0x04
 CMD_GET_STATUS = 0x05
 CMD_SET_ADDRESS = 0x06
 CMD_WRITE_DATA = 0x07
+CMD_GET_ACTIVE_BANK = 0x08
+CMD_SET_IMAGE_INFO = 0x09
+CMD_VERIFY_BANK = 0x0A
 
 # Responses
 RESP_ACK = 0x10
@@ -207,10 +211,12 @@ ERR_FLASH_WRITE_FAILED = 0x04
 ERR_INVALID_DATA_LENGTH = 0x05
 ERR_NO_VALID_APP = 0x06
 ERR_TIMEOUT = 0x07
+ERR_CRC_MISMATCH = 0x08
 
 # Memory Configuration
-APP_START_ADDRESS = 0x08008000
-APP_MAX_SIZE = 208 * 1024  # 208 KB (last 16KB reserved for permanent storage)
+BANK_A_ADDRESS = 0x08008000
+BANK_B_ADDRESS = 0x08022000
+BANK_SIZE = 104 * 1024
 
 # Timing
 RESPONSE_TIMEOUT = 2.0       # Normal response timeout (seconds) - generous for busy bus
@@ -235,8 +241,22 @@ ERROR_DESCRIPTIONS = {
     ERR_FLASH_WRITE_FAILED: "Flash write failed",
     ERR_INVALID_DATA_LENGTH: "Invalid data length",
     ERR_NO_VALID_APP: "No valid application",
-    ERR_TIMEOUT: "Operation timeout"
+    ERR_TIMEOUT: "Operation timeout",
+    ERR_CRC_MISMATCH: "CRC mismatch"
 }
+
+STATE_NAMES = {
+    0: 'IDLE',
+    1: 'ERASING',
+    2: 'WRITING',
+    3: 'READING',
+    4: 'VERIFYING',
+    5: 'JUMPING',
+}
+
+
+def bank_name(bank: int) -> str:
+    return 'A' if bank == 0 else 'B'
 
 
 # ============================================================================
@@ -255,6 +275,35 @@ class BootloaderStatus:
         state_name = states[self.state] if self.state < len(states) else 'UNKNOWN'
         error_desc = ERROR_DESCRIPTIONS.get(self.error, f'Unknown error {self.error}')
         return f"State: {state_name}, Error: {error_desc}, Bytes Written: {self.bytes_written}"
+
+
+@dataclass
+class BankStatus:
+    active_bank: int
+    bank_a_valid: int
+    bank_b_valid: int
+
+    @property
+    def inactive_bank(self) -> int:
+        return 1 if self.active_bank == 0 else 0
+
+    @property
+    def inactive_start_address(self) -> int:
+        return BANK_B_ADDRESS if self.active_bank == 0 else BANK_A_ADDRESS
+
+    @staticmethod
+    def bank_start_address(bank: int) -> int:
+        return BANK_A_ADDRESS if bank == 0 else BANK_B_ADDRESS
+
+    def __str__(self):
+        active_name = bank_name(self.active_bank)
+        valid_a = 'valid' if self.bank_a_valid else 'invalid'
+        valid_b = 'valid' if self.bank_b_valid else 'invalid'
+        return (
+            f"Active bank: {active_name} | "
+            f"Bank A: {valid_a} | "
+            f"Bank B: {valid_b}"
+        )
 
 
 # ============================================================================
@@ -276,6 +325,10 @@ class CANBootloaderFlash:
         self.driver = adapter
         self.connected = False
         self.verbose = True
+        self.last_ready_active_bank: Optional[int] = None
+        self.last_ready_flags: Optional[int] = None
+        self.last_ready_state: Optional[int] = None
+        self.last_ready_error: Optional[int] = None
         
     def connect(self) -> bool:
         """
@@ -375,13 +428,42 @@ class CANBootloaderFlash:
             if msg and msg.id == CAN_BOOTLOADER_ID:
                 if len(msg.data) > 0 and msg.data[0] == RESP_READY:
                     version = msg.data[1] if len(msg.data) > 1 else 0
+                    # READY heartbeat payload byte5 is diagnostic flags.
+                    # bit0: active_bank(B=1, A=0)
+                    if len(msg.data) > 5:
+                        self.last_ready_flags = msg.data[5]
+                        self.last_ready_active_bank = 1 if (msg.data[5] & 0x01) else 0
+                    if len(msg.data) > 3:
+                        self.last_ready_state = msg.data[3]
+                    if len(msg.data) > 4:
+                        self.last_ready_error = msg.data[4]
                     if self.verbose:
-                        print(f"✓ Bootloader READY (version: {version})")
+                        state_name = STATE_NAMES.get(self.last_ready_state, 'UNKNOWN') if self.last_ready_state is not None else 'N/A'
+                        error_name = ERROR_DESCRIPTIONS.get(self.last_ready_error, f'Error {self.last_ready_error}') if self.last_ready_error is not None else 'N/A'
+                        if self.last_ready_active_bank is None:
+                            print(f"✓ Bootloader READY (version: {version})")
+                        else:
+                            active_name = bank_name(self.last_ready_active_bank)
+                            print(
+                                f"✓ Bootloader READY (version: {version}, active bank: {active_name}, "
+                                f"state: {state_name}, last error: {error_name})"
+                            )
+                            if self.last_ready_flags is not None:
+                                print(
+                                    f"  READY flags: 0x{self.last_ready_flags:02X} "
+                                    f"(A_valid={(self.last_ready_flags >> 1) & 1}, "
+                                    f"B_valid={(self.last_ready_flags >> 2) & 1}, "
+                                    f"metadata_ready={(self.last_ready_flags >> 3) & 1})"
+                                )
                     return True
         
         if self.verbose:
             print("⚠ No READY message received (bootloader may already be running)")
         return False
+
+    def get_active_bank_from_ready_heartbeat(self) -> Optional[int]:
+        """Get active bank decoded from the most recent READY heartbeat, if available."""
+        return self.last_ready_active_bank
     
     def get_status(self) -> Optional[BootloaderStatus]:
         """
@@ -466,6 +548,76 @@ class CANBootloaderFlash:
                 continue
         
         print("✗ Erase failed after all retries")
+        return False
+
+    def get_active_bank(self) -> Optional[BankStatus]:
+        """Query active bank and validity flags from bootloader."""
+        if self.verbose:
+            print("Querying active bank...")
+
+        for attempt in range(MAX_RETRIES):
+            if attempt > 0:
+                self.driver.clear_receive_queue()
+                time.sleep(0.05)
+
+            if not self.send_command(CMD_GET_ACTIVE_BANK, []):
+                continue
+
+            resp = self.wait_response()
+            if not resp or len(resp.data) < 4:
+                continue
+
+            if resp.data[0] == RESP_DATA:
+                status = BankStatus(
+                    active_bank=resp.data[1],
+                    bank_a_valid=resp.data[2],
+                    bank_b_valid=resp.data[3],
+                )
+                if self.verbose:
+                    print(f"✓ {status}")
+                return status
+
+        if self.verbose:
+            print("✗ Failed to query active bank")
+        return None
+
+    def set_image_info(self, crc32: int, image_size: int) -> bool:
+        """Send expected CRC32 and image size to bootloader."""
+        if image_size <= 0 or image_size > BANK_SIZE:
+            print(f"✗ Invalid image size: {image_size}")
+            return False
+
+        payload = [
+            (crc32 >> 24) & 0xFF,
+            (crc32 >> 16) & 0xFF,
+            (crc32 >> 8) & 0xFF,
+            crc32 & 0xFF,
+            (image_size >> 16) & 0xFF,
+            (image_size >> 8) & 0xFF,
+            image_size & 0xFF,
+        ]
+
+        if not self.send_command(CMD_SET_IMAGE_INFO, payload):
+            return False
+
+        resp = self.wait_response()
+        return bool(resp and resp.data[0] == RESP_ACK)
+
+    def verify_inactive_bank_crc(self) -> bool:
+        """Trigger CRC verification of the inactive bank in bootloader."""
+        if not self.send_command(CMD_VERIFY_BANK, []):
+            return False
+
+        resp = self.wait_response(timeout=ERASE_TIMEOUT)
+        if not resp:
+            return False
+
+        if resp.data[0] == RESP_ACK:
+            return True
+
+        if resp.data[0] == RESP_NACK:
+            error_code = resp.data[1] if len(resp.data) > 1 else 0
+            print(f"✗ Verify failed: {ERROR_DESCRIPTIONS.get(error_code, f'Error {error_code}')}")
         return False
     
     def set_address(self, address: int) -> bool:
@@ -603,7 +755,7 @@ class CANBootloaderFlash:
             data = data + b'\xFF' * padding_needed
         return data
     
-    def write_firmware(self, firmware_data: bytes) -> bool:
+    def write_firmware(self, firmware_data: bytes, start_address: int) -> bool:
         """
         Write complete firmware to flash using reliable 8-byte-aligned writes with retry.
         
@@ -636,7 +788,7 @@ class CANBootloaderFlash:
         # Set initial address with retry
         address_set = False
         for attempt in range(MAX_RETRIES):
-            if self.set_address(APP_START_ADDRESS):
+            if self.set_address(start_address):
                 address_set = True
                 break
             self.driver.clear_receive_queue()
@@ -665,7 +817,7 @@ class CANBootloaderFlash:
                     total_retries += 1
                     self.driver.clear_receive_queue()
                     time.sleep(0.01)
-                    if not self.set_address(APP_START_ADDRESS + bytes_written):
+                    if not self.set_address(start_address + bytes_written):
                         continue
                 
                 # Send first 4 bytes (bootloader buffers these)
@@ -704,7 +856,7 @@ class CANBootloaderFlash:
         
         return True
     
-    def verify_flash(self, expected_data: bytes) -> bool:
+    def verify_flash(self, expected_data: bytes, start_address: int) -> bool:
         """
         Verify flashed data by reading back and comparing, one chunk at a time with retry.
         
@@ -718,7 +870,7 @@ class CANBootloaderFlash:
         print("Verifying flash contents...")
         print("="*60)
         
-        address = APP_START_ADDRESS
+        address = start_address
         bytes_verified = 0
         chunk_size = 4  # Read 4 bytes at a time for reliability
         total_retries = 0
@@ -775,6 +927,37 @@ class CANBootloaderFlash:
         print(f"  Total time: {elapsed:.1f}s\n")
         
         return True
+
+    @staticmethod
+    def select_firmware_for_bank(input_path: Path, target_bank: int) -> Optional[Path]:
+        """Pick a bank-specific firmware file when _a/_b variants exist."""
+        target_suffix = '_a' if target_bank == 0 else '_b'
+        other_suffix = '_b' if target_bank == 0 else '_a'
+
+        if input_path.is_dir():
+            candidates = sorted(input_path.glob(f'*{target_suffix}.bin'))
+            if candidates:
+                return candidates[0]
+            return None
+
+        stem = input_path.stem
+        if stem.endswith(target_suffix):
+            return input_path
+
+        if stem.endswith(other_suffix):
+            candidate = input_path.with_name(stem[:-2] + target_suffix + input_path.suffix)
+            if candidate.exists():
+                return candidate
+            return None
+
+        candidate = input_path.with_name(stem + target_suffix + input_path.suffix)
+        if candidate.exists():
+            return candidate
+
+        if input_path.exists():
+            return input_path
+
+        return None
     
     def jump_to_application(self) -> bool:
         """
@@ -844,8 +1027,8 @@ class CANBootloaderFlash:
             print("✗ Failed to send reset message")
             return False
     
-    def flash_firmware(self, firmware_path: Path, verify: bool = True, 
-                      jump: bool = True) -> bool:
+    def flash_firmware(self, firmware_path: Path, verify: bool = True,
+                      jump: bool = True, target_bank: Optional[int] = None) -> bool:
         """
         Complete firmware flashing process.
         
@@ -857,30 +1040,76 @@ class CANBootloaderFlash:
         Returns:
             True if flashing successful
         """
+        bank_status = self.get_active_bank()
+        active_bank_from_status = bank_status.active_bank if bank_status else None
+        active_bank_from_ready = self.get_active_bank_from_ready_heartbeat()
+
+        if target_bank is None:
+            if active_bank_from_ready is not None:
+                active_bank_resolved = active_bank_from_ready
+                if self.verbose:
+                    source_name = bank_name(active_bank_resolved)
+                    print(f"Using READY heartbeat for auto bank selection (active bank: {source_name}).")
+            elif active_bank_from_status is not None:
+                active_bank_resolved = active_bank_from_status
+                if self.verbose:
+                    source_name = bank_name(active_bank_resolved)
+                    print(f"Using CMD_GET_ACTIVE_BANK for auto bank selection (active bank: {source_name}).")
+            else:
+                print("✗ Failed to determine active bank from READY heartbeat or bootloader query")
+                return False
+            target_bank_resolved = 1 if active_bank_resolved == 0 else 0
+        else:
+            target_bank_resolved = target_bank
+            active_bank_resolved = active_bank_from_status if active_bank_from_status is not None else active_bank_from_ready
+
+        if active_bank_resolved is not None and target_bank_resolved == active_bank_resolved:
+            active_name = bank_name(active_bank_resolved)
+            requested_name = bank_name(target_bank_resolved)
+            print(f"✗ Cannot flash Bank {requested_name}: it is currently active ({active_name}).")
+            print("  Bootloader only permits writing the inactive bank.")
+            return False
+
+        target_address = BankStatus.bank_start_address(target_bank_resolved)
+        selected_firmware = self.select_firmware_for_bank(firmware_path, target_bank_resolved)
+        if not selected_firmware or not selected_firmware.exists():
+            print("✗ Could not resolve firmware file for target bank")
+            return False
+
+        target_name = bank_name(target_bank_resolved)
+        active_name = '?'
+        if active_bank_resolved is not None:
+            active_name = bank_name(active_bank_resolved)
+
         # Read firmware file
         print(f"\n{'='*60}")
-        print(f"Loading firmware: {firmware_path.name}")
+        print(f"Loading firmware: {selected_firmware.name}")
         print(f"{'='*60}")
+        print(f"Current active bank: {active_name}")
+        print(f"Target bank: {target_name} @ 0x{target_address:08X}")
         
         try:
-            firmware_data = firmware_path.read_bytes()
+            firmware_data = selected_firmware.read_bytes()
             original_size = len(firmware_data)
 
-            # Truncate to APP_MAX_SIZE if larger (last 16KB reserved for permanent storage)
-            if original_size > APP_MAX_SIZE:
-                print(f"⚠ Firmware size ({original_size} bytes) exceeds {APP_MAX_SIZE} bytes")
-                print(f"  Truncating to {APP_MAX_SIZE} bytes (last 16KB reserved for permanent storage)")
-                firmware_data = firmware_data[:APP_MAX_SIZE]
-                original_size = len(firmware_data)
+            if original_size > BANK_SIZE:
+                print(f"✗ Firmware size ({original_size} bytes) exceeds bank size {BANK_SIZE} bytes")
+                return False
 
             # Pad to 4-byte boundary (ensures 8-byte alignment)
             firmware_data = self.pad_to_4byte_boundary(firmware_data)
+            crc32 = binascii.crc32(firmware_data) & 0xFFFFFFFF
 
             print(f"✓ Loaded {original_size} bytes ({original_size/1024:.2f} KB)")
             if len(firmware_data) != original_size:
                 print(f"  Padded to {len(firmware_data)} bytes (4-byte aligned)\n")
             else:
                 print()
+            print(f"Expected CRC32: 0x{crc32:08X}")
+            print(
+                f"Planned transition: active {active_name} -> target {target_name} "
+                f"(verify={'on' if verify else 'off'}, jump={'on' if jump else 'off'})"
+            )
         except Exception as e:
             print(f"✗ Failed to read firmware file: {e}")
             return False
@@ -894,19 +1123,31 @@ class CANBootloaderFlash:
         # Erase flash
         if not self.erase_flash():
             return False
+
+        if bank_status:
+            print(f"Post-erase metadata snapshot: {bank_status}")
         
         # Write firmware
-        if not self.write_firmware(firmware_data):
+        if not self.write_firmware(firmware_data, target_address):
             return False
+
+        # Bootloader-side CRC verification
+        if not self.set_image_info(crc32, len(firmware_data)):
+            print("✗ Failed to send image info")
+            return False
+        if not self.verify_inactive_bank_crc():
+            return False
+        print("✓ Bootloader CRC verification passed for staged image")
         
         # Verify by reading back
         if verify:
-            if not self.verify_flash(firmware_data):
+            if not self.verify_flash(firmware_data, target_address):
                 print("⚠ Warning: Flash verification failed")
                 return False
         
         # Jump to application
         if jump:
+            print(f"Committing bank switch to Bank {target_name} via CMD_JUMP_TO_APP...")
             if not self.jump_to_application():
                 print("⚠ Warning: Jump command may have failed")
         
@@ -929,6 +1170,7 @@ Examples:
     python Scripts/Flash_Application.py application.bin
     python Scripts/Flash_Application.py application.bin --adapter pcan --channel USB1
     python Scripts/Flash_Application.py application.bin --adapter canable --channel 0
+    python Scripts/Flash_Application.py C:/Development/BMS-Firmware-RTOS/build/debug --target-bank b --module 0
     python Scripts/Flash_Application.py application.bin --no-jump
     python Scripts/Flash_Application.py application.bin --status-only
         '''
@@ -953,6 +1195,11 @@ Examples:
                        help='Only get bootloader status and exit')
     parser.add_argument('--list-devices', action='store_true',
                        help='List available CAN devices and exit')
+    parser.add_argument('--target-bank', type=str, default='inactive',
+                       choices=['inactive', 'a', 'b'],
+                       help='Target bank to flash (default: inactive)')
+    parser.add_argument('--module', type=int, default=None,
+                       help='Module number to reset before flashing (0-5). If omitted, prompt interactively.')
 
     args = parser.parse_args()
 
@@ -1019,6 +1266,14 @@ Examples:
             print(f"✗ Error: Firmware file not found: {firmware_path}")
             return 1
 
+    target_bank_arg: Optional[int]
+    if args.target_bank == 'inactive':
+        target_bank_arg = None
+    elif args.target_bank == 'a':
+        target_bank_arg = 0
+    else:
+        target_bank_arg = 1
+
     # Create adapter instance based on selection
     try:
         if args.adapter == 'pcan':
@@ -1059,33 +1314,42 @@ Examples:
         print("Module Reset")
         print("="*60)
         
-        while True:
-            try:
-                module_input = input("Enter module number to reset (0-5): ").strip()
-                module_number = int(module_input)
-                if 0 <= module_number <= 5:
-                    if not flasher.send_reset_message(module_number):
-                        print("⚠ Reset message failed, but continuing with flash...")
-                    # Reset message sent and READY received (or timed out)
-                    break
-                else:
-                    print("✗ Invalid module number. Please enter 0-5.")
-            except ValueError:
-                print("✗ Invalid input. Please enter a number 0-5.")
-            except KeyboardInterrupt:
-                print("\n✗ Cancelled by user")
+        if args.module is not None:
+            if args.module < 0 or args.module > 5:
+                print("✗ Invalid --module value. Must be 0-5.")
                 return 1
+            if not flasher.send_reset_message(args.module):
+                print("⚠ Reset message failed, but continuing with flash...")
+        else:
+            while True:
+                try:
+                    module_input = input("Enter module number to reset (0-5): ").strip()
+                    module_number = int(module_input)
+                    if 0 <= module_number <= 5:
+                        if not flasher.send_reset_message(module_number):
+                            print("⚠ Reset message failed, but continuing with flash...")
+                        # Reset message sent and READY received (or timed out)
+                        break
+                    else:
+                        print("✗ Invalid module number. Please enter 0-5.")
+                except ValueError:
+                    print("✗ Invalid input. Please enter a number 0-5.")
+                except KeyboardInterrupt:
+                    print("\n✗ Cancelled by user")
+                    return 1
 
         # Flash firmware
         print(f"Firmware file: {firmware_path}")
         print(f"CAN adapter:   {adapter_name}")
+        print(f"Target bank:   {args.target_bank.upper()}")
         print(f"Read-back verify: {'Yes' if args.verify else 'No'}")
         print(f"Jump to app:   {'Yes' if args.jump else 'No'}")
         
         success = flasher.flash_firmware(
             firmware_path,
             verify=args.verify,
-            jump=args.jump
+            jump=args.jump,
+            target_bank=target_bank_arg
         )
         
         if success:

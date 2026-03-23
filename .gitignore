@@ -8,6 +8,8 @@
 
 # Build output
 build/
+*.bin
+*.elf
 
 # VS Code
 .vscode/
@@ -75,3 +77,6 @@ Release/
 # Backup files
 *.bak
 *~
+
+# Generated bootloader DBC (source of truth is Scripts/generate_dbc_bootloader.py)
+STM32L432_Bootloader.dbc

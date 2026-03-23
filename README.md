@@ -97,6 +97,16 @@ void SystemInit(void) {
 
 ## CAN Protocol
 
+The bootloader DBC is generated, not hand-edited.
+
+Generate it with:
+
+```bash
+python Scripts/generate_dbc_bootloader.py
+```
+
+This writes `STM32L432_Bootloader.dbc` in the repository root.
+
 ### CAN Message IDs (29-bit Extended IDs)
 
 | Direction          | CAN ID        | Description               |

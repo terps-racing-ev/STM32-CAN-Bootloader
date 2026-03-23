@@ -1,206 +1,168 @@
 VERSION ""
 
 NS_ : 
-    NS_DESC_
-    CM_
-    BA_DEF_
-    BA_
-    VAL_
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+	BO_TX_BU_
+	BA_DEF_REL_
+	BA_REL_
+	BA_SGTYPE_REL_
+	SG_MUL_VAL_
 
 BS_:
 
-BU_: Host Bootloader Application
+BU_: CAN_Host Bootloader BMS_Module_0 BMS_Module_1 BMS_Module_2 BMS_Module_3 BMS_Module_4 BMS_Module_5
 
-BO_ 2147485440 Bootloader_Response: 8 Bootloader
- SG_ ResponseType : 0|8@1+ (1,0) [0|255] ""  Host
- SG_ DataByte0 : 8|8@1+ (1,0) [0|255] ""  Host
- SG_ DataByte1 : 16|8@1+ (1,0) [0|255] ""  Host
- SG_ DataByte2 : 24|8@1+ (1,0) [0|255] ""  Host
- SG_ DataByte3 : 32|8@1+ (1,0) [0|255] ""  Host
- SG_ DataByte4 : 40|8@1+ (1,0) [0|255] ""  Host
- SG_ DataByte5 : 48|8@1+ (1,0) [0|255] ""  Host
- SG_ DataByte6 : 56|8@1+ (1,0) [0|255] ""  Host
+BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN";
+BA_DEF_ BO_  "GenMsgCycleTime" INT 0 10000;
+BA_DEF_DEF_  "VFrameFormat" "StandardCAN";
+BA_DEF_DEF_  "GenMsgCycleTime" 0;
 
-CM_ BO_ 2147485440 "Bootloader response messages to host PC. Contains ACK/NACK, status, data, and error information.";
-CM_ SG_ 2147485440 ResponseType "Type of response: ACK(0x10), NACK(0x11), ERROR(0x12), BUSY(0x13), READY(0x14), DATA(0x15), JUMP_INFO(0x16)";
-CM_ SG_ 2147485440 DataByte0 "Generic data byte 0 - ErrorCode for NACK/ERROR, Version for READY, Data for READ responses";
-CM_ SG_ 2147485440 DataByte1 "Generic data byte 1 - State for STATUS, Data for READ responses";
-CM_ SG_ 2147485440 DataByte2 "Generic data byte 2 - BytesWritten[0] for STATUS, Data for READ responses";
-CM_ SG_ 2147485440 DataByte3 "Generic data byte 3 - BytesWritten[1] for STATUS, Data for READ responses";
-CM_ SG_ 2147485440 DataByte4 "Generic data byte 4 - BytesWritten[2] for STATUS, Data for READ responses";
-CM_ SG_ 2147485440 DataByte5 "Generic data byte 5 - BytesWritten[3] for STATUS, Data for READ responses";
-CM_ SG_ 2147485440 DataByte6 "Generic data byte 6 - Data for READ responses";
+BO_ 2550138625 BL_Host_Command: 8 CAN_Host
+ SG_ Command : 0|8@1+ (1,0) [0|255] "" Bootloader
+ SG_ Byte0 : 8|8@1+ (1,0) [0|255] "" Bootloader
+ SG_ Byte1 : 16|8@1+ (1,0) [0|255] "" Bootloader
+ SG_ Byte2 : 24|8@1+ (1,0) [0|255] "" Bootloader
+ SG_ Byte3 : 32|8@1+ (1,0) [0|255] "" Bootloader
+ SG_ Byte4 : 40|8@1+ (1,0) [0|255] "" Bootloader
+ SG_ Byte5 : 48|8@1+ (1,0) [0|255] "" Bootloader
+ SG_ Byte6 : 56|8@1+ (1,0) [0|255] "" Bootloader
 
-VAL_ 2147485440 ResponseType 16 "ACK" 17 "NACK" 18 "ERROR" 19 "BUSY" 20 "READY" 21 "DATA" 22 "JUMP_INFO" ;
-VAL_ 2147485440 DataByte0 0 "ERR_NONE" 1 "ERR_INVALID_COMMAND" 2 "ERR_INVALID_ADDRESS" 3 "ERR_FLASH_ERASE_FAILED" 4 "ERR_FLASH_WRITE_FAILED" 5 "ERR_INVALID_DATA_LENGTH" 6 "ERR_NO_VALID_APP" 7 "ERR_TIMEOUT" ;
+BO_ 2550138624 BL_Response: 8 Bootloader
+ SG_ ResponseCode M : 0|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ AckLastError m16 : 8|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ NackErrorCode m17 : 8|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ ErrorCode m18 : 8|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ BusyState m19 : 8|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ ReadyCode1 m20 : 8|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ ReadyCode2 m20 : 16|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ HeartbeatState m20 : 24|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ HeartbeatLastError m20 : 32|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ HeartbeatActiveBankB m20 : 40|1@1+ (1,0) [0|1] "" CAN_Host
+ SG_ HeartbeatBankAValid m20 : 41|1@1+ (1,0) [0|1] "" CAN_Host
+ SG_ HeartbeatBankBValid m20 : 42|1@1+ (1,0) [0|1] "" CAN_Host
+ SG_ HeartbeatMetadataReady m20 : 43|1@1+ (1,0) [0|1] "" CAN_Host
+ SG_ HeartbeatCanCommandSeen m20 : 44|1@1+ (1,0) [0|1] "" CAN_Host
+ SG_ HeartbeatImageInfoValid m20 : 45|1@1+ (1,0) [0|1] "" CAN_Host
+ SG_ HeartbeatVerifiedBankValid m20 : 46|1@1+ (1,0) [0|1] "" CAN_Host
+ SG_ HeartbeatJumpPending m20 : 47|1@1+ (1,0) [0|1] "" CAN_Host
+ SG_ HeartbeatBytesWrittenHi m20 : 48|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ HeartbeatBytesWrittenLo m20 : 56|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ DataByte1 m21 : 8|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ DataByte2 m21 : 16|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ DataByte3 m21 : 24|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ DataByte4 m21 : 32|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ DataByte5 m21 : 40|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ DataByte6 m21 : 48|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ DataByte7 m21 : 56|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ JumpStackPtrMsb m22 : 8|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ JumpStackPtrByte2 m22 : 16|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ JumpStackPtrByte1 m22 : 24|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ JumpStackPtrLsb m22 : 32|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ JumpResetVecByte2 m22 : 40|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ JumpResetVecByte1 m22 : 48|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ JumpResetVecLsb m22 : 56|8@1+ (1,0) [0|255] "" CAN_Host
 
-BO_ 2147485441 Host_Command: 8 Host
- SG_ CommandType : 0|8@1+ (1,0) [0|255] ""  Bootloader
- SG_ DataByte0 : 8|8@1+ (1,0) [0|255] ""  Bootloader
- SG_ DataByte1 : 16|8@1+ (1,0) [0|255] ""  Bootloader
- SG_ DataByte2 : 24|8@1+ (1,0) [0|255] ""  Bootloader
- SG_ DataByte3 : 32|8@1+ (1,0) [0|255] ""  Bootloader
- SG_ DataByte4 : 40|8@1+ (1,0) [0|255] ""  Bootloader
- SG_ DataByte5 : 48|8@1+ (1,0) [0|255] ""  Bootloader
- SG_ DataByte6 : 56|8@1+ (1,0) [0|255] ""  Bootloader
+BO_ 2297433858 BMS_Reset_Command_0: 1 CAN_Host
+ SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_0
 
-CM_ BO_ 2147485441 "Host command messages to bootloader for firmware update operations";
-CM_ SG_ 2147485441 CommandType "Command from host: ERASE(1), WRITE_FLASH(2), READ_FLASH(3), JUMP(4), STATUS(5), SET_ADDR(6), WRITE_DATA(7)";
-CM_ SG_ 2147485441 DataByte0 "Data byte 0 - Address[31:24] for SET_ADDRESS, Data for WRITE_DATA, Length for READ_FLASH";
-CM_ SG_ 2147485441 DataByte1 "Data byte 1 - Address[23:16] for SET_ADDRESS, Data for WRITE_DATA";
-CM_ SG_ 2147485441 DataByte2 "Data byte 2 - Address[15:8] for SET_ADDRESS, Data for WRITE_DATA";
-CM_ SG_ 2147485441 DataByte3 "Data byte 3 - Address[7:0] for SET_ADDRESS, Data for WRITE_DATA";
-CM_ SG_ 2147485441 DataByte4 "Data byte 4 - DataLength for WRITE_DATA (always 0x04)";
-CM_ SG_ 2147485441 DataByte5 "Data byte 5 - Reserved";
-CM_ SG_ 2147485441 DataByte6 "Data byte 6 - Reserved";
+BO_ 2297437954 BMS_Reset_Command_1: 1 CAN_Host
+ SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_1
 
-VAL_ 2147485441 CommandType 1 "CMD_ERASE_FLASH" 2 "CMD_WRITE_FLASH" 3 "CMD_READ_FLASH" 4 "CMD_JUMP_TO_APP" 5 "CMD_GET_STATUS" 6 "CMD_SET_ADDRESS" 7 "CMD_WRITE_DATA" ;
+BO_ 2297442050 BMS_Reset_Command_2: 1 CAN_Host
+ SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_2
 
-BO_ 2147485442 Bootloader_JumpInfo: 8 Bootloader
- SG_ ResponseType : 0|8@1+ (1,0) [0|255] ""  Host
- SG_ StackPointer : 8|32@1+ (1,0) [0|4294967295] ""  Host
- SG_ ResetVector_High : 40|16@1+ (1,0) [0|65535] ""  Host
- SG_ ResetVector_Low : 56|8@1+ (1,0) [0|255] ""  Host
+BO_ 2297446146 BMS_Reset_Command_3: 1 CAN_Host
+ SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_3
 
-CM_ BO_ 2147485442 "Detailed jump to application diagnostics (sent immediately before jumping to application code)";
-CM_ SG_ 2147485442 ResponseType "Always RESP_JUMP_INFO (0x16) for this message";
-CM_ SG_ 2147485442 StackPointer "Application initial stack pointer from vector table at 0x08008000. Should be 0x2000xxxx (valid RAM address)";
-CM_ SG_ 2147485442 ResetVector_High "Application reset handler address bits [23:8]. Combined with ResetVector_Low gives full address";
-CM_ SG_ 2147485442 ResetVector_Low "Application reset handler address bits [7:0]. LSB should be 1 (Thumb mode). Full address should be 0x0800xxxx";
+BO_ 2297450242 BMS_Reset_Command_4: 1 CAN_Host
+ SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_4
 
-BO_ 258 Application_Heartbeat: 8 Application
- SG_ Counter : 0|8@1+ (1,0) [0|255] ""  Host,Bootloader
- SG_ StatusByte1 : 8|8@1+ (1,0) [0|255] ""  Host,Bootloader
- SG_ StatusByte2 : 16|8@1+ (1,0) [0|255] ""  Host,Bootloader
- SG_ StatusByte3 : 24|8@1+ (1,0) [0|255] ""  Host,Bootloader
- SG_ Reserved1 : 32|8@1+ (1,0) [0|255] ""  Host,Bootloader
- SG_ Reserved2 : 40|8@1+ (1,0) [0|255] ""  Host,Bootloader
- SG_ Reserved3 : 48|8@1+ (1,0) [0|255] ""  Host,Bootloader
- SG_ Reserved4 : 56|8@1+ (1,0) [0|255] ""  Host,Bootloader
+BO_ 2297454338 BMS_Reset_Command_5: 1 CAN_Host
+ SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_5
 
-CM_ BO_ 258 "Application heartbeat message sent every 10 seconds when application is running. Indicates successful jump from bootloader.";
-CM_ SG_ 258 Counter "Heartbeat counter, increments with each message (rolls over at 255)";
-CM_ SG_ 258 StatusByte1 "Status byte 1: Always 0x55 (signature)";
-CM_ SG_ 258 StatusByte2 "Status byte 2: Always 0x01 (message type)";
-CM_ SG_ 258 StatusByte3 "Status byte 3: Reserved";
-CM_ SG_ 258 Reserved1 "Reserved for future use (application state, error flags, etc.)";
-CM_ SG_ 258 Reserved2 "Reserved for future use";
-CM_ SG_ 258 Reserved3 "Reserved for future use";
-CM_ SG_ 258 Reserved4 "Reserved for future use";
+CM_ BO_ 2550138625 "Host command frame to bootloader. ID 0x18000701 (extended).";
+CM_ BO_ 2550138624 "Bootloader response frame. ID 0x18000700 (extended).";
+CM_ BO_ 2297433858 "Reset command for module 0. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
+CM_ BO_ 2297437954 "Reset command for module 1. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
+CM_ BO_ 2297442050 "Reset command for module 2. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
+CM_ BO_ 2297446146 "Reset command for module 3. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
+CM_ BO_ 2297450242 "Reset command for module 4. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
+CM_ BO_ 2297454338 "Reset command for module 5. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
 
-BO_ 1808 Thermistor_Pair_0: 8 Application
- SG_ Temp_Ch0 : 0|16@1- (0.1,0) [-400|1250] "degC"  Host
- SG_ Temp_Ch1 : 16|16@1- (0.1,0) [-400|1250] "degC"  Host
- SG_ Channel_0_ID : 32|8@1+ (1,0) [0|7] ""  Host
- SG_ Channel_1_ID : 40|8@1+ (1,0) [0|7] ""  Host
- SG_ Reserved1 : 48|8@1+ (1,0) [0|255] ""  Host
- SG_ Reserved2 : 56|8@1+ (1,0) [0|255] ""  Host
+CM_ SG_ 2550138625 Command "ERASE(1), WRITE_FLASH(2), READ_FLASH(3), JUMP(4), STATUS(5), SET_ADDRESS(6), WRITE_DATA(7), GET_ACTIVE_BANK(8), SET_IMAGE_INFO(9), VERIFY_BANK(10).";
+CM_ SG_ 2550138624 ResponseCode "ACK(16), NACK(17), ERROR(18), BUSY(19), READY(20), DATA(21), JUMP_INFO(22).";
+CM_ SG_ 2550138624 AckLastError "ACK payload byte 1: last error code snapshot.";
+CM_ SG_ 2550138624 NackErrorCode "NACK payload byte 1: error code for the rejected command.";
+CM_ SG_ 2550138624 ErrorCode "ERROR payload byte 1.";
+CM_ SG_ 2550138624 BusyState "BUSY payload byte 1: current bootloader state.";
+CM_ SG_ 2550138624 ReadyCode1 "READY payload byte 1: version major or special marker.";
+CM_ SG_ 2550138624 ReadyCode2 "READY payload byte 2: version minor or special marker.";
+CM_ SG_ 2550138624 HeartbeatState "Bootloader state: IDLE/ERASING/WRITING/READING/VERIFYING/JUMPING.";
+CM_ SG_ 2550138624 HeartbeatLastError "Last bootloader error code.";
+CM_ SG_ 2550138624 HeartbeatActiveBankB "1 = active bank is B, 0 = active bank is A.";
+CM_ SG_ 2550138624 HeartbeatBankAValid "1 = metadata marks Bank A as valid.";
+CM_ SG_ 2550138624 HeartbeatBankBValid "1 = metadata marks Bank B as valid.";
+CM_ SG_ 2550138624 HeartbeatMetadataReady "1 = boot metadata read/initialized successfully.";
+CM_ SG_ 2550138624 HeartbeatCanCommandSeen "1 = at least one CAN command has been received since boot.";
+CM_ SG_ 2550138624 HeartbeatImageInfoValid "1 = image CRC/size info has been provided by host.";
+CM_ SG_ 2550138624 HeartbeatVerifiedBankValid "1 = a bank has been CRC-verified in this session.";
+CM_ SG_ 2550138624 HeartbeatJumpPending "1 = jump to application is pending.";
+CM_ SG_ 2550138624 HeartbeatBytesWrittenHi "bytes_written[15:8].";
+CM_ SG_ 2550138624 HeartbeatBytesWrittenLo "bytes_written[7:0].";
+CM_ SG_ 2550138624 DataByte1 "DATA payload byte 1 (command-dependent).";
+CM_ SG_ 2550138624 DataByte2 "DATA payload byte 2 (command-dependent).";
+CM_ SG_ 2550138624 DataByte3 "DATA payload byte 3 (command-dependent).";
+CM_ SG_ 2550138624 DataByte4 "DATA payload byte 4 (command-dependent).";
+CM_ SG_ 2550138624 DataByte5 "DATA payload byte 5 (command-dependent).";
+CM_ SG_ 2550138624 DataByte6 "DATA payload byte 6 (command-dependent).";
+CM_ SG_ 2550138624 DataByte7 "DATA payload byte 7 (command-dependent).";
+CM_ SG_ 2550138624 JumpStackPtrMsb "JUMP_INFO payload byte 1: stack pointer[31:24].";
+CM_ SG_ 2550138624 JumpStackPtrByte2 "JUMP_INFO payload byte 2: stack pointer[23:16].";
+CM_ SG_ 2550138624 JumpStackPtrByte1 "JUMP_INFO payload byte 3: stack pointer[15:8].";
+CM_ SG_ 2550138624 JumpStackPtrLsb "JUMP_INFO payload byte 4: stack pointer[7:0].";
+CM_ SG_ 2550138624 JumpResetVecByte2 "JUMP_INFO payload byte 5: reset vector[23:16].";
+CM_ SG_ 2550138624 JumpResetVecByte1 "JUMP_INFO payload byte 6: reset vector[15:8].";
+CM_ SG_ 2550138624 JumpResetVecLsb "JUMP_INFO payload byte 7: reset vector[7:0].";
 
-CM_ BO_ 1808 "Thermistor pair 0: Channels 0 and 1 temperature readings (sent every 2 seconds, 0.1°C resolution)";
-CM_ SG_ 1808 Temp_Ch0 "Temperature from thermistor channel 0 (0.1°C resolution, little-endian signed 16-bit)";
-CM_ SG_ 1808 Temp_Ch1 "Temperature from thermistor channel 1 (0.1°C resolution, little-endian signed 16-bit)";
-CM_ SG_ 1808 Channel_0_ID "Always 0 - identifies first thermistor channel in this message";
-CM_ SG_ 1808 Channel_1_ID "Always 1 - identifies second thermistor channel in this message";
-CM_ SG_ 1808 Reserved1 "Reserved for future use";
-CM_ SG_ 1808 Reserved2 "Reserved for future use";
+VAL_ 2550138625 Command 1 "CMD_ERASE_FLASH" 2 "CMD_WRITE_FLASH" 3 "CMD_READ_FLASH" 4 "CMD_JUMP_TO_APP" 5 "CMD_GET_STATUS" 6 "CMD_SET_ADDRESS" 7 "CMD_WRITE_DATA" 8 "CMD_GET_ACTIVE_BANK" 9 "CMD_SET_IMAGE_INFO" 10 "CMD_VERIFY_BANK" ;
 
-BO_ 1809 Thermistor_Pair_1: 8 Application
- SG_ Temp_Ch2 : 0|16@1- (0.1,0) [-400|1250] "degC"  Host
- SG_ Temp_Ch3 : 16|16@1- (0.1,0) [-400|1250] "degC"  Host
- SG_ Channel_2_ID : 32|8@1+ (1,0) [0|7] ""  Host
- SG_ Channel_3_ID : 40|8@1+ (1,0) [0|7] ""  Host
- SG_ Reserved1 : 48|8@1+ (1,0) [0|255] ""  Host
- SG_ Reserved2 : 56|8@1+ (1,0) [0|255] ""  Host
+VAL_ 2550138624 ResponseCode 16 "RESP_ACK" 17 "RESP_NACK" 18 "RESP_ERROR" 19 "RESP_BUSY" 20 "RESP_READY" 21 "RESP_DATA" 22 "RESP_JUMP_INFO" ;
+VAL_ 2550138624 HeartbeatState 0 "BL_STATE_IDLE" 1 "BL_STATE_ERASING" 2 "BL_STATE_WRITING" 3 "BL_STATE_READING" 4 "BL_STATE_VERIFYING" 5 "BL_STATE_JUMPING" ;
+VAL_ 2550138624 HeartbeatLastError 0 "ERR_NONE" 1 "ERR_INVALID_COMMAND" 2 "ERR_INVALID_ADDRESS" 3 "ERR_FLASH_ERASE_FAILED" 4 "ERR_FLASH_WRITE_FAILED" 5 "ERR_INVALID_DATA_LENGTH" 6 "ERR_NO_VALID_APP" 7 "ERR_TIMEOUT" 8 "ERR_CRC_MISMATCH" ;
+VAL_ 2550138624 HeartbeatActiveBankB 0 "BANK_A_ACTIVE" 1 "BANK_B_ACTIVE" ;
+VAL_ 2550138624 HeartbeatBankAValid 0 "BANK_A_INVALID" 1 "BANK_A_VALID" ;
+VAL_ 2550138624 HeartbeatBankBValid 0 "BANK_B_INVALID" 1 "BANK_B_VALID" ;
+VAL_ 2550138624 HeartbeatMetadataReady 0 "METADATA_NOT_READY" 1 "METADATA_READY" ;
+VAL_ 2550138624 HeartbeatCanCommandSeen 0 "NO_COMMAND_SEEN" 1 "COMMAND_SEEN" ;
+VAL_ 2550138624 HeartbeatImageInfoValid 0 "IMAGE_INFO_INVALID" 1 "IMAGE_INFO_VALID" ;
+VAL_ 2550138624 HeartbeatVerifiedBankValid 0 "VERIFIED_BANK_INVALID" 1 "VERIFIED_BANK_VALID" ;
+VAL_ 2550138624 HeartbeatJumpPending 0 "JUMP_NOT_PENDING" 1 "JUMP_PENDING" ;
 
-CM_ BO_ 1809 "Thermistor pair 1: Channels 2 and 3 temperature readings (sent every 2 seconds, 0.1°C resolution)";
-CM_ SG_ 1809 Temp_Ch2 "Temperature from thermistor channel 2 (0.1°C resolution, little-endian signed 16-bit)";
-CM_ SG_ 1809 Temp_Ch3 "Temperature from thermistor channel 3 (0.1°C resolution, little-endian signed 16-bit)";
-CM_ SG_ 1809 Channel_2_ID "Always 2 - identifies first thermistor channel in this message";
-CM_ SG_ 1809 Channel_3_ID "Always 3 - identifies second thermistor channel in this message";
-CM_ SG_ 1809 Reserved1 "Reserved for future use";
-CM_ SG_ 1809 Reserved2 "Reserved for future use";
-
-BO_ 1810 Thermistor_Pair_2: 8 Application
- SG_ Temp_Ch4 : 0|16@1- (0.1,0) [-400|1250] "degC"  Host
- SG_ Temp_Ch5 : 16|16@1- (0.1,0) [-400|1250] "degC"  Host
- SG_ Channel_4_ID : 32|8@1+ (1,0) [0|7] ""  Host
- SG_ Channel_5_ID : 40|8@1+ (1,0) [0|7] ""  Host
- SG_ Reserved1 : 48|8@1+ (1,0) [0|255] ""  Host
- SG_ Reserved2 : 56|8@1+ (1,0) [0|255] ""  Host
-
-CM_ BO_ 1810 "Thermistor pair 2: Channels 4 and 5 temperature readings (sent every 2 seconds, 0.1°C resolution)";
-CM_ SG_ 1810 Temp_Ch4 "Temperature from thermistor channel 4 (0.1°C resolution, little-endian signed 16-bit)";
-CM_ SG_ 1810 Temp_Ch5 "Temperature from thermistor channel 5 (0.1°C resolution, little-endian signed 16-bit)";
-CM_ SG_ 1810 Channel_4_ID "Always 4 - identifies first thermistor channel in this message";
-CM_ SG_ 1810 Channel_5_ID "Always 5 - identifies second thermistor channel in this message";
-CM_ SG_ 1810 Reserved1 "Reserved for future use";
-CM_ SG_ 1810 Reserved2 "Reserved for future use";
-
-BO_ 1811 Thermistor_Pair_3: 8 Application
- SG_ Temp_Ch6 : 0|16@1- (0.1,0) [-400|1250] "degC"  Host
- SG_ Temp_Ch7 : 16|16@1- (0.1,0) [-400|1250] "degC"  Host
- SG_ Channel_6_ID : 32|8@1+ (1,0) [0|7] ""  Host
- SG_ Channel_7_ID : 40|8@1+ (1,0) [0|7] ""  Host
- SG_ Reserved1 : 48|8@1+ (1,0) [0|255] ""  Host
- SG_ Reserved2 : 56|8@1+ (1,0) [0|255] ""  Host
-
-CM_ BO_ 1811 "Thermistor pair 3: Channels 6 and 7 temperature readings (sent every 2 seconds, 0.1°C resolution)";
-CM_ SG_ 1811 Temp_Ch6 "Temperature from thermistor channel 6 (0.1°C resolution, little-endian signed 16-bit)";
-CM_ SG_ 1811 Temp_Ch7 "Temperature from thermistor channel 7 (0.1°C resolution, little-endian signed 16-bit)";
-CM_ SG_ 1811 Channel_6_ID "Always 6 - identifies first thermistor channel in this message";
-CM_ SG_ 1811 Channel_7_ID "Always 7 - identifies second thermistor channel in this message";
-CM_ SG_ 1811 Reserved1 "Reserved for future use";
-CM_ SG_ 1811 Reserved2 "Reserved for future use";
-
-BO_ 1824 ADC_Raw_0_3: 8 Application
- SG_ ADC_Ch0 : 0|16@1+ (1,0) [0|4095] "counts"  Host
- SG_ ADC_Ch1 : 16|16@1+ (1,0) [0|4095] "counts"  Host
- SG_ ADC_Ch2 : 32|16@1+ (1,0) [0|4095] "counts"  Host
- SG_ ADC_Ch3 : 48|16@1+ (1,0) [0|4095] "counts"  Host
-
-CM_ BO_ 1824 "Raw ADC values for thermistor channels 0-3 (diagnostic message, sent every 2 seconds)";
-CM_ SG_ 1824 ADC_Ch0 "Raw 12-bit ADC reading from thermistor channel 0 (0-4095 counts)";
-CM_ SG_ 1824 ADC_Ch1 "Raw 12-bit ADC reading from thermistor channel 1 (0-4095 counts)";
-CM_ SG_ 1824 ADC_Ch2 "Raw 12-bit ADC reading from thermistor channel 2 (0-4095 counts)";
-CM_ SG_ 1824 ADC_Ch3 "Raw 12-bit ADC reading from thermistor channel 3 (0-4095 counts)";
-
-BO_ 1825 ADC_Raw_4_7: 8 Application
- SG_ ADC_Ch4 : 0|16@1+ (1,0) [0|4095] "counts"  Host
- SG_ ADC_Ch5 : 16|16@1+ (1,0) [0|4095] "counts"  Host
- SG_ ADC_Ch6 : 32|16@1+ (1,0) [0|4095] "counts"  Host
- SG_ ADC_Ch7 : 48|16@1+ (1,0) [0|4095] "counts"  Host
-
-CM_ BO_ 1825 "Raw ADC values for thermistor channels 4-7 (diagnostic message, sent every 2 seconds)";
-CM_ SG_ 1825 ADC_Ch4 "Raw 12-bit ADC reading from thermistor channel 4 (0-4095 counts)";
-CM_ SG_ 1825 ADC_Ch5 "Raw 12-bit ADC reading from thermistor channel 5 (0-4095 counts)";
-CM_ SG_ 1825 ADC_Ch6 "Raw 12-bit ADC reading from thermistor channel 6 (0-4095 counts)";
-CM_ SG_ 1825 ADC_Ch7 "Raw 12-bit ADC reading from thermistor channel 7 (0-4095 counts)";
-
-BA_DEF_ "BusType" STRING ;
-BA_DEF_ BO_ "GenMsgCycleTime" INT 0 10000;
-BA_DEF_ BO_ "GenMsgSendType" STRING ;
-BA_DEF_ SG_ "GenSigStartValue" INT 0 2147483647;
-
-BA_DEF_DEF_ "BusType" "CAN";
-BA_DEF_DEF_ "GenMsgCycleTime" 0;
-BA_DEF_DEF_ "GenMsgSendType" "cyclic";
-BA_DEF_DEF_ "GenSigStartValue" 0;
-
-BA_ "BusType" "CAN";
-BA_ "GenMsgCycleTime" BO_ 258 10000;
-BA_ "GenMsgCycleTime" BO_ 1808 1000;
-BA_ "GenMsgCycleTime" BO_ 1809 1000;
-BA_ "GenMsgCycleTime" BO_ 1810 1000;
-BA_ "GenMsgCycleTime" BO_ 1811 1000;
-BA_ "GenMsgCycleTime" BO_ 1824 2000;
-BA_ "GenMsgCycleTime" BO_ 1825 2000;
-BA_ "GenMsgSendType" BO_ 2147485440 "event";
-BA_ "GenMsgSendType" BO_ 2147485441 "event";
-BA_ "GenMsgSendType" BO_ 2147485442 "event";
-BA_ "GenMsgSendType" BO_ 258 "cyclic";
-BA_ "GenMsgSendType" BO_ 1808 "cyclic";
-BA_ "GenMsgSendType" BO_ 1809 "cyclic";
-BA_ "GenMsgSendType" BO_ 1810 "cyclic";
-BA_ "GenMsgSendType" BO_ 1811 "cyclic";
-BA_ "GenMsgSendType" BO_ 1824 "cyclic";
-BA_ "GenMsgSendType" BO_ 1825 "cyclic";
+// Extended CAN ID markers
+BA_ "VFrameFormat" BO_ 2550138625 1;
+BA_ "VFrameFormat" BO_ 2550138624 1;
+BA_ "VFrameFormat" BO_ 2297433858 1;
+BA_ "VFrameFormat" BO_ 2297437954 1;
+BA_ "VFrameFormat" BO_ 2297442050 1;
+BA_ "VFrameFormat" BO_ 2297446146 1;
+BA_ "VFrameFormat" BO_ 2297450242 1;
+BA_ "VFrameFormat" BO_ 2297454338 1;

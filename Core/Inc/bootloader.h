@@ -29,6 +29,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdint.h>
 
 /* Exported defines ----------------------------------------------------------*/
 
@@ -37,21 +38,32 @@ extern "C" {
 #define LED_PIN                     GPIO_PIN_3
 
 /* Memory layout definitions */
-#define BOOTLOADER_SIZE             0x8000      /* 32KB for bootloader */
-#define APPLICATION_ADDRESS         0x08008000  /* Application starts at 32KB offset */
+/* Bootloader code must stay within pages 0-14 (30KB).
+ * Page 15 is reserved for boot metadata. */
+#define BOOTLOADER_CODE_SIZE        0x7800      /* 30KB for bootloader code */
+#define BOOT_METADATA_ADDRESS       0x08007800  /* Start of page 15 (2KB metadata page) */
+#define BOOT_METADATA_PAGE          15u
+
+#define BANK_A_ADDRESS              0x08008000  /* Application bank A start */
+#define BANK_B_ADDRESS              0x08022000  /* Application bank B start */
+#define BANK_SIZE                   0x1A000     /* 104KB per bank */
+#define BANK_A_END_ADDRESS          (BANK_A_ADDRESS + BANK_SIZE - 1)
+#define BANK_B_END_ADDRESS          (BANK_B_ADDRESS + BANK_SIZE - 1)
+
 #define PERMANENT_STORAGE_SIZE      0x4000      /* 16KB reserved for permanent data storage */
 #define PERMANENT_STORAGE_ADDRESS   0x0803C000  /* Last 16KB of flash (256KB - 16KB) */
 #define FLASH_END_ADDRESS           0x0803FFFF  /* Physical end of 256KB flash */
-#define APPLICATION_END_ADDRESS     (PERMANENT_STORAGE_ADDRESS - 1)  /* 0x0803BFFF */
-#define APPLICATION_SIZE            (APPLICATION_END_ADDRESS - APPLICATION_ADDRESS + 1)  /* 208KB */
 
-/* Application valid flag storage (last 8 bytes before application) */
-#define APP_VALID_FLAG_ADDRESS      0x08007FF8  /* Last 8 bytes of bootloader flash */
-#define APP_VALID_MAGIC_NUMBER      0xDEADBEEF  /* Magic number indicating valid app */
-#define APP_VALID_FLAG_COMPLEMENT   0x21524110  /* Bitwise NOT of magic number */
+#define BOOT_METADATA_MAGIC         0xAB12AB12u
+#define BOOT_METADATA_UPDATE_IDLE   0x00u
+#define BOOT_METADATA_UPDATE_IN_PROGRESS 0xA5u
+
+#define BOOT_BANK_A                 0u
+#define BOOT_BANK_B                 1u
+#define BOOT_BANK_INVALID           0xFFu
 
 /* Bootloader timeout */
-#define BOOTLOADER_TIMEOUT_MS       1000        /* 5 second timeout */
+#define BOOTLOADER_TIMEOUT_MS       1000        /* 10 second timeout */
 
 /* Heartbeat interval */
 #define HEARTBEAT_INTERVAL_MS       1000         /* 1 second heartbeat interval */
@@ -72,6 +84,9 @@ extern "C" {
 #define CMD_GET_STATUS              0x05        /* Get bootloader status */
 #define CMD_SET_ADDRESS             0x06        /* Set write address */
 #define CMD_WRITE_DATA              0x07        /* Write 4 bytes (buffers 2 chunks for 8-byte write) */
+#define CMD_GET_ACTIVE_BANK         0x08        /* Get active/valid bank info */
+#define CMD_SET_IMAGE_INFO          0x09        /* Set expected CRC32 + image size */
+#define CMD_VERIFY_BANK             0x0A        /* Verify inactive bank CRC */
 
 /* CAN Response IDs */
 #define RESP_ACK                    0x10        /* Command acknowledged */
@@ -91,6 +106,7 @@ extern "C" {
 #define ERR_INVALID_DATA_LENGTH     0x05
 #define ERR_NO_VALID_APP            0x06
 #define ERR_TIMEOUT                 0x07
+#define ERR_CRC_MISMATCH            0x08
 
 /* Bootloader states */
 typedef enum {
@@ -111,16 +127,27 @@ typedef struct {
     uint8_t last_error;
 } BootloaderStatus_t;
 
+  typedef struct {
+    uint32_t magic;
+    uint8_t active_bank;
+    uint8_t bank_a_valid;
+    uint8_t bank_b_valid;
+    uint8_t reserved0;              /* Update transaction marker */
+    uint32_t bank_a_crc;
+    uint32_t bank_b_crc;
+    uint32_t bank_a_size;
+    uint32_t bank_b_size;
+    uint32_t complement;
+    uint32_t reserved1;
+  } BootMetadata_t;
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Bootloader_Init(CAN_HandleTypeDef *hcan);
 void Bootloader_Main(void);
 void Bootloader_ProcessCANMessage(void);
 uint8_t Bootloader_JumpToApplication(void);
-uint8_t Bootloader_CheckValidApplication(void);
+uint8_t Bootloader_CheckValidApplication(uint8_t bank);
 void Bootloader_SendCANMessage(uint8_t cmd, uint8_t *data, uint8_t length);
-uint8_t Bootloader_SetApplicationValidFlag(void);
-uint8_t Bootloader_CheckApplicationValidFlag(void);
-void Bootloader_ClearApplicationValidFlag(void);
 
 /* LED control functions */
 void Bootloader_LED_Init(void);

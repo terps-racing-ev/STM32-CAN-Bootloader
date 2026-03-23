@@ -58,13 +58,14 @@ _Min_Heap_Size = 0x200;      /* required amount of heap  */
 _Min_Stack_Size = 0x400; /* required amount of stack */
 
 /* Specify the memory areas */
-/* Bootloader occupies first 32KB (0x8000) of flash */
-/* Application starts at 0x08008000 (32KB offset) */
+/* Bootloader code occupies first 30KB (0x7800) of flash */
+/* Page 15 (0x08007800-0x08007FFF) is reserved for boot metadata */
+/* Application bank A starts at 0x08008000 */
 MEMORY
 {
 RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 48K
 RAM2 (xrw)      : ORIGIN = 0x10000000, LENGTH = 16K
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 32K  /* Bootloader only uses 32KB */
+FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 30K  /* Keep page 15 for metadata */
 }
 
 /* Define output sections */
