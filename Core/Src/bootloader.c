@@ -409,14 +409,18 @@ void Bootloader_Init(CAN_HandleTypeDef *hcan)
     }
     metadata_ready = 1;
 
-    /* Validate stored CRC for each bank at startup */
-    if (Bootloader_IsBankMarkedValid(BOOT_BANK_A))
+    /* Validate stored CRC for each bank at startup.
+     * Performed even if a bank is marked invalid, so the host can see
+     * whether flash contents still match a previously-stored CRC. */
+    if (boot_metadata.bank_a_size > 0 && boot_metadata.bank_a_size <= BANK_SIZE)
     {
-        bank_a_crc_ok = Bootloader_IsBankCrcValid(BOOT_BANK_A);
+        uint32_t crc = Bootloader_ComputeCRC32(BANK_A_ADDRESS, boot_metadata.bank_a_size);
+        bank_a_crc_ok = (crc == boot_metadata.bank_a_crc) ? 1 : 0;
     }
-    if (Bootloader_IsBankMarkedValid(BOOT_BANK_B))
+    if (boot_metadata.bank_b_size > 0 && boot_metadata.bank_b_size <= BANK_SIZE)
     {
-        bank_b_crc_ok = Bootloader_IsBankCrcValid(BOOT_BANK_B);
+        uint32_t crc = Bootloader_ComputeCRC32(BANK_B_ADDRESS, boot_metadata.bank_b_size);
+        bank_b_crc_ok = (crc == boot_metadata.bank_b_crc) ? 1 : 0;
     }
     
     /* Configure CAN filter */
