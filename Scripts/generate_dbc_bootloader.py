@@ -87,7 +87,8 @@ def generate_dbc_lines() -> list[str]:
     lines.append(' SG_ ErrorCode m18 : 8|8@1+ (1,0) [0|255] "" CAN_Host')
     lines.append(' SG_ BusyState m19 : 8|8@1+ (1,0) [0|255] "" CAN_Host')
     lines.append(' SG_ ReadyCode1 m20 : 8|8@1+ (1,0) [0|255] "" CAN_Host')
-    lines.append(' SG_ ReadyCode2 m20 : 16|8@1+ (1,0) [0|255] "" CAN_Host')
+    lines.append(' SG_ HeartbeatBankACrcOk m20 : 16|1@1+ (1,0) [0|1] "" CAN_Host')
+    lines.append(' SG_ HeartbeatBankBCrcOk m20 : 17|1@1+ (1,0) [0|1] "" CAN_Host')
     lines.append(' SG_ HeartbeatState m20 : 24|8@1+ (1,0) [0|255] "" CAN_Host')
     lines.append(' SG_ HeartbeatLastError m20 : 32|8@1+ (1,0) [0|255] "" CAN_Host')
     lines.append(' SG_ HeartbeatActiveBankB m20 : 40|1@1+ (1,0) [0|1] "" CAN_Host')
@@ -146,7 +147,8 @@ def generate_dbc_lines() -> list[str]:
     lines.append(f'CM_ SG_ {bl_resp_id} ErrorCode "ERROR payload byte 1.";')
     lines.append(f'CM_ SG_ {bl_resp_id} BusyState "BUSY payload byte 1: current bootloader state.";')
     lines.append(f'CM_ SG_ {bl_resp_id} ReadyCode1 "READY payload byte 1: version major or special marker.";')
-    lines.append(f'CM_ SG_ {bl_resp_id} ReadyCode2 "READY payload byte 2: version minor or special marker.";')
+    lines.append(f'CM_ SG_ {bl_resp_id} HeartbeatBankACrcOk "1 = Bank A stored CRC matches computed CRC at startup.";')
+    lines.append(f'CM_ SG_ {bl_resp_id} HeartbeatBankBCrcOk "1 = Bank B stored CRC matches computed CRC at startup.";')
     lines.append(f'CM_ SG_ {bl_resp_id} HeartbeatState "Bootloader state: IDLE/ERASING/WRITING/READING/VERIFYING/JUMPING.";')
     lines.append(f'CM_ SG_ {bl_resp_id} HeartbeatLastError "Last bootloader error code.";')
     lines.append(f'CM_ SG_ {bl_resp_id} HeartbeatActiveBankB "1 = active bank is B, 0 = active bank is A.";')
@@ -212,6 +214,12 @@ def generate_dbc_lines() -> list[str]:
     )
     lines.append(
         f'VAL_ {bl_resp_id} HeartbeatJumpPending 0 "JUMP_NOT_PENDING" 1 "JUMP_PENDING" ;'
+    )
+    lines.append(
+        f'VAL_ {bl_resp_id} HeartbeatBankACrcOk 0 "BANK_A_CRC_FAIL" 1 "BANK_A_CRC_OK" ;'
+    )
+    lines.append(
+        f'VAL_ {bl_resp_id} HeartbeatBankBCrcOk 0 "BANK_B_CRC_FAIL" 1 "BANK_B_CRC_OK" ;'
     )
     lines.append('')
 

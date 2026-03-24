@@ -37,6 +37,8 @@ static uint32_t pending_image_crc = 0;
 static uint32_t pending_image_size = 0;
 static uint8_t pending_image_info_valid = 0;
 static uint8_t pending_verified_bank = BOOT_BANK_INVALID;
+static uint8_t bank_a_crc_ok = 0;  /* Startup CRC validation result for bank A */
+static uint8_t bank_b_crc_ok = 0;  /* Startup CRC validation result for bank B */
 
 /* Private function prototypes -----------------------------------------------*/
 static void Bootloader_ConfigureCANFilter(void);
@@ -58,7 +60,7 @@ static uint8_t Bootloader_IsAddressInBank(uint32_t address, uint32_t length, uin
 static uint8_t Bootloader_IsAddressInAnyBank(uint32_t address, uint32_t length);
 static uint32_t Bootloader_ComputeCRC32(uint32_t start_address, uint32_t size);
 static uint8_t Bootloader_JumpToBank(uint8_t bank);
-static void Bootloader_FillReadyHeartbeatPayload(uint8_t code1, uint8_t code2);
+static void Bootloader_FillReadyHeartbeatPayload(uint8_t code1);
 static uint8_t Bootloader_IsBankMarkedValid(uint8_t bank);
 static uint8_t Bootloader_IsBankCrcValid(uint8_t bank);
 static void Bootloader_InvalidateBankMetadata(uint8_t bank);
@@ -74,9 +76,10 @@ static uint8_t Bootloader_IsUpdateInProgress(void)
     return (boot_metadata.reserved0 == BOOT_METADATA_UPDATE_IN_PROGRESS) ? 1 : 0;
 }
 
-static void Bootloader_FillReadyHeartbeatPayload(uint8_t code1, uint8_t code2)
+static void Bootloader_FillReadyHeartbeatPayload(uint8_t code1)
 {
     uint8_t flags = 0;
+    uint8_t crc_health = 0;
 
     if (Bootloader_GetActiveBank() == BOOT_BANK_B)
     {
@@ -111,10 +114,19 @@ static void Bootloader_FillReadyHeartbeatPayload(uint8_t code1, uint8_t code2)
         flags |= (1u << 7);
     }
 
+    if (bank_a_crc_ok)
+    {
+        crc_health |= (1u << 0);
+    }
+    if (bank_b_crc_ok)
+    {
+        crc_health |= (1u << 1);
+    }
+
     memset(tx_data, 0, sizeof(tx_data));
     tx_data[0] = RESP_READY;
     tx_data[1] = code1;                                /* Version major or special marker */
-    tx_data[2] = code2;                                /* Version minor or special marker */
+    tx_data[2] = crc_health;                           /* Bank CRC health flags */
     tx_data[3] = (uint8_t)bootloader_status.state;     /* Bootloader state */
     tx_data[4] = bootloader_status.last_error;         /* Last error code */
     tx_data[5] = flags;                                /* Active/valid bank and diagnostic flags */
@@ -347,6 +359,7 @@ static void Bootloader_InvalidateBankMetadata(uint8_t bank)
             boot_metadata.bank_a_valid = 0;
             boot_metadata.bank_a_crc = 0;
             boot_metadata.bank_a_size = 0;
+            bank_a_crc_ok = 0;
             changed = 1;
         }
     }
@@ -357,6 +370,7 @@ static void Bootloader_InvalidateBankMetadata(uint8_t bank)
             boot_metadata.bank_b_valid = 0;
             boot_metadata.bank_b_crc = 0;
             boot_metadata.bank_b_size = 0;
+            bank_b_crc_ok = 0;
             changed = 1;
         }
     }
@@ -394,6 +408,16 @@ void Bootloader_Init(CAN_HandleTypeDef *hcan)
         Bootloader_WriteMetadata(&boot_metadata);
     }
     metadata_ready = 1;
+
+    /* Validate stored CRC for each bank at startup */
+    if (Bootloader_IsBankMarkedValid(BOOT_BANK_A))
+    {
+        bank_a_crc_ok = Bootloader_IsBankCrcValid(BOOT_BANK_A);
+    }
+    if (Bootloader_IsBankMarkedValid(BOOT_BANK_B))
+    {
+        bank_b_crc_ok = Bootloader_IsBankCrcValid(BOOT_BANK_B);
+    }
     
     /* Configure CAN filter */
     Bootloader_ConfigureCANFilter();
@@ -476,7 +500,7 @@ void Bootloader_Main(void)
     last_heartbeat_time = last_heartbeat;
     
     /* Send startup diagnostic heartbeat frame. */
-    Bootloader_FillReadyHeartbeatPayload(0x01, 0x00);
+    Bootloader_FillReadyHeartbeatPayload(0x01);
     Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
     
     /* Main bootloader loop with timeout */
@@ -497,7 +521,7 @@ void Bootloader_Main(void)
             (HAL_GetTick() - last_heartbeat) >= HEARTBEAT_INTERVAL_MS)
         {
             /* Send periodic diagnostic heartbeat. */
-            Bootloader_FillReadyHeartbeatPayload(0x01, 0x00);
+            Bootloader_FillReadyHeartbeatPayload(0x01);
             Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
             last_heartbeat = HAL_GetTick();
             last_heartbeat_time = last_heartbeat;  /* Update static variable */
@@ -520,7 +544,7 @@ void Bootloader_Main(void)
                     Bootloader_IsBankCrcValid(active_bank) &&
                     Bootloader_CheckValidApplication(active_bank))
                 {
-                    Bootloader_FillReadyHeartbeatPayload(0xA5, 0x5A);
+                    Bootloader_FillReadyHeartbeatPayload(0xA5);
                     Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
                     Bootloader_WaitForCANTransmission();
                     HAL_Delay(10);
@@ -535,7 +559,7 @@ void Bootloader_Main(void)
             if (Bootloader_CheckValidApplication(active_bank))
             {
                 /* Send timeout jump diagnostic frame. */
-                Bootloader_FillReadyHeartbeatPayload(0xAA, 0x55);
+                Bootloader_FillReadyHeartbeatPayload(0xAA);
                 Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
 
                 /* Wait for message to send */
@@ -562,7 +586,7 @@ void Bootloader_Main(void)
         if (jump_to_app_flag)
         {
             /* Send pre-jump diagnostic frame. */
-            Bootloader_FillReadyHeartbeatPayload(0xFF, 0xFF);
+            Bootloader_FillReadyHeartbeatPayload(0xFF);
             Bootloader_SendCANMessage(RESP_READY, tx_data, 8);
             
             /* Wait for this message to be sent */
@@ -847,6 +871,8 @@ void Bootloader_ProcessCANMessage(void)
                     boot_metadata.bank_b_valid = 0;
                     boot_metadata.bank_b_crc = 0;
                     boot_metadata.bank_b_size = 0;
+                    bank_a_crc_ok = 1;
+                    bank_b_crc_ok = 0;
                 }
                 else
                 {
@@ -856,6 +882,8 @@ void Bootloader_ProcessCANMessage(void)
                     boot_metadata.bank_a_valid = 0;
                     boot_metadata.bank_a_crc = 0;
                     boot_metadata.bank_a_size = 0;
+                    bank_b_crc_ok = 1;
+                    bank_a_crc_ok = 0;
                 }
 
                 boot_metadata.reserved0 = BOOT_METADATA_UPDATE_IDLE;
@@ -942,12 +970,14 @@ static uint8_t Bootloader_EraseBank(uint8_t bank)
         boot_metadata.bank_a_valid = 0;
         boot_metadata.bank_a_crc = 0;
         boot_metadata.bank_a_size = 0;
+        bank_a_crc_ok = 0;
     }
     else
     {
         boot_metadata.bank_b_valid = 0;
         boot_metadata.bank_b_crc = 0;
         boot_metadata.bank_b_size = 0;
+        bank_b_crc_ok = 0;
     }
 
     if (Bootloader_WriteMetadata(&boot_metadata) != ERR_NONE)

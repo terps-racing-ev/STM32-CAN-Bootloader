@@ -53,7 +53,8 @@ BO_ 2550138624 BL_Response: 8 Bootloader
  SG_ ErrorCode m18 : 8|8@1+ (1,0) [0|255] "" CAN_Host
  SG_ BusyState m19 : 8|8@1+ (1,0) [0|255] "" CAN_Host
  SG_ ReadyCode1 m20 : 8|8@1+ (1,0) [0|255] "" CAN_Host
- SG_ ReadyCode2 m20 : 16|8@1+ (1,0) [0|255] "" CAN_Host
+ SG_ HeartbeatBankACrcOk m20 : 16|1@1+ (1,0) [0|1] "" CAN_Host
+ SG_ HeartbeatBankBCrcOk m20 : 17|1@1+ (1,0) [0|1] "" CAN_Host
  SG_ HeartbeatState m20 : 24|8@1+ (1,0) [0|255] "" CAN_Host
  SG_ HeartbeatLastError m20 : 32|8@1+ (1,0) [0|255] "" CAN_Host
  SG_ HeartbeatActiveBankB m20 : 40|1@1+ (1,0) [0|1] "" CAN_Host
@@ -115,7 +116,8 @@ CM_ SG_ 2550138624 NackErrorCode "NACK payload byte 1: error code for the reject
 CM_ SG_ 2550138624 ErrorCode "ERROR payload byte 1.";
 CM_ SG_ 2550138624 BusyState "BUSY payload byte 1: current bootloader state.";
 CM_ SG_ 2550138624 ReadyCode1 "READY payload byte 1: version major or special marker.";
-CM_ SG_ 2550138624 ReadyCode2 "READY payload byte 2: version minor or special marker.";
+CM_ SG_ 2550138624 HeartbeatBankACrcOk "1 = Bank A stored CRC matches computed CRC at startup.";
+CM_ SG_ 2550138624 HeartbeatBankBCrcOk "1 = Bank B stored CRC matches computed CRC at startup.";
 CM_ SG_ 2550138624 HeartbeatState "Bootloader state: IDLE/ERASING/WRITING/READING/VERIFYING/JUMPING.";
 CM_ SG_ 2550138624 HeartbeatLastError "Last bootloader error code.";
 CM_ SG_ 2550138624 HeartbeatActiveBankB "1 = active bank is B, 0 = active bank is A.";
@@ -156,6 +158,8 @@ VAL_ 2550138624 HeartbeatCanCommandSeen 0 "NO_COMMAND_SEEN" 1 "COMMAND_SEEN" ;
 VAL_ 2550138624 HeartbeatImageInfoValid 0 "IMAGE_INFO_INVALID" 1 "IMAGE_INFO_VALID" ;
 VAL_ 2550138624 HeartbeatVerifiedBankValid 0 "VERIFIED_BANK_INVALID" 1 "VERIFIED_BANK_VALID" ;
 VAL_ 2550138624 HeartbeatJumpPending 0 "JUMP_NOT_PENDING" 1 "JUMP_PENDING" ;
+VAL_ 2550138624 HeartbeatBankACrcOk 0 "BANK_A_CRC_FAIL" 1 "BANK_A_CRC_OK" ;
+VAL_ 2550138624 HeartbeatBankBCrcOk 0 "BANK_B_CRC_FAIL" 1 "BANK_B_CRC_OK" ;
 
 // Extended CAN ID markers
 BA_ "VFrameFormat" BO_ 2550138625 1;
