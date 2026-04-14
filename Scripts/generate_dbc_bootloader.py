@@ -50,7 +50,7 @@ def generate_dbc_lines() -> list[str]:
     lines.append('BS_:')
     lines.append('')
 
-    lines.append('BU_: CAN_Host Bootloader BMS_Module_0 BMS_Module_1 BMS_Module_2 BMS_Module_3 BMS_Module_4 BMS_Module_5')
+    lines.append('BU_: CAN_Host Bootloader')
     lines.append('')
 
     # Attributes (match application style)
@@ -117,23 +117,9 @@ def generate_dbc_lines() -> list[str]:
     lines.append(' SG_ JumpResetVecLsb m22 : 56|8@1+ (1,0) [0|255] "" CAN_Host')
     lines.append('')
 
-    # Reset command IDs (host -> module), one per module like application DBC style
-    reset_ids: list[int] = []
-    for module in range(6):
-        can_id = 0x08F00F02 + (module << 12)
-        dbc_id = ext_dbc_id(can_id)
-        reset_ids.append(dbc_id)
-        lines.append(f'BO_ {dbc_id} BMS_Reset_Command_{module}: 1 CAN_Host')
-        lines.append(f' SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_{module}')
-        lines.append('')
-
     # Comments
     lines.append(f'CM_ BO_ {host_cmd_id} "Host command frame to bootloader. ID 0x18000701 (extended).";')
     lines.append(f'CM_ BO_ {bl_resp_id} "Bootloader response frame. ID 0x18000700 (extended).";')
-    for module, dbc_id in enumerate(reset_ids):
-        lines.append(
-            f'CM_ BO_ {dbc_id} "Reset command for module {module}. Base ID 0x08F00F02 with module in bits [15:12] (extended).";'
-        )
     lines.append('')
 
     lines.append(
@@ -186,6 +172,9 @@ def generate_dbc_lines() -> list[str]:
         f'VAL_ {bl_resp_id} ResponseCode 16 "RESP_ACK" 17 "RESP_NACK" 18 "RESP_ERROR" 19 "RESP_BUSY" 20 "RESP_READY" 21 "RESP_DATA" 22 "RESP_JUMP_INFO" ;'
     )
     lines.append(
+        f'VAL_ {bl_resp_id} ReadyCode1 1 "READY_HEARTBEAT" 165 "READY_RECOVERY_PATH" 170 "READY_TIMEOUT_PATH" 255 "READY_JUMP_PENDING" ;'
+    )
+    lines.append(
         f'VAL_ {bl_resp_id} HeartbeatState 0 "BL_STATE_IDLE" 1 "BL_STATE_ERASING" 2 "BL_STATE_WRITING" 3 "BL_STATE_READING" 4 "BL_STATE_VERIFYING" 5 "BL_STATE_JUMPING" ;'
     )
     lines.append(
@@ -227,8 +216,6 @@ def generate_dbc_lines() -> list[str]:
     lines.append('// Extended CAN ID markers')
     lines.append(f'BA_ "VFrameFormat" BO_ {host_cmd_id} 1;')
     lines.append(f'BA_ "VFrameFormat" BO_ {bl_resp_id} 1;')
-    for dbc_id in reset_ids:
-        lines.append(f'BA_ "VFrameFormat" BO_ {dbc_id} 1;')
 
     return lines
 

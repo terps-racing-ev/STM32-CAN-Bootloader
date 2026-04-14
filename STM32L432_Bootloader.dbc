@@ -29,7 +29,7 @@ NS_ :
 
 BS_:
 
-BU_: CAN_Host Bootloader BMS_Module_0 BMS_Module_1 BMS_Module_2 BMS_Module_3 BMS_Module_4 BMS_Module_5
+BU_: CAN_Host Bootloader
 
 BA_DEF_ BO_  "VFrameFormat" ENUM  "StandardCAN","ExtendedCAN";
 BA_DEF_ BO_  "GenMsgCycleTime" INT 0 10000;
@@ -82,32 +82,8 @@ BO_ 2550138624 BL_Response: 8 Bootloader
  SG_ JumpResetVecByte1 m22 : 48|8@1+ (1,0) [0|255] "" CAN_Host
  SG_ JumpResetVecLsb m22 : 56|8@1+ (1,0) [0|255] "" CAN_Host
 
-BO_ 2297433858 BMS_Reset_Command_0: 1 CAN_Host
- SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_0
-
-BO_ 2297437954 BMS_Reset_Command_1: 1 CAN_Host
- SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_1
-
-BO_ 2297442050 BMS_Reset_Command_2: 1 CAN_Host
- SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_2
-
-BO_ 2297446146 BMS_Reset_Command_3: 1 CAN_Host
- SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_3
-
-BO_ 2297450242 BMS_Reset_Command_4: 1 CAN_Host
- SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_4
-
-BO_ 2297454338 BMS_Reset_Command_5: 1 CAN_Host
- SG_ Reset_Request : 0|8@1+ (1,0) [0|255] "" BMS_Module_5
-
 CM_ BO_ 2550138625 "Host command frame to bootloader. ID 0x18000701 (extended).";
 CM_ BO_ 2550138624 "Bootloader response frame. ID 0x18000700 (extended).";
-CM_ BO_ 2297433858 "Reset command for module 0. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
-CM_ BO_ 2297437954 "Reset command for module 1. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
-CM_ BO_ 2297442050 "Reset command for module 2. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
-CM_ BO_ 2297446146 "Reset command for module 3. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
-CM_ BO_ 2297450242 "Reset command for module 4. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
-CM_ BO_ 2297454338 "Reset command for module 5. Base ID 0x08F00F02 with module in bits [15:12] (extended).";
 
 CM_ SG_ 2550138625 Command "ERASE(1), WRITE_FLASH(2), READ_FLASH(3), JUMP(4), STATUS(5), SET_ADDRESS(6), WRITE_DATA(7), GET_ACTIVE_BANK(8), SET_IMAGE_INFO(9), VERIFY_BANK(10).";
 CM_ SG_ 2550138624 ResponseCode "ACK(16), NACK(17), ERROR(18), BUSY(19), READY(20), DATA(21), JUMP_INFO(22).";
@@ -148,6 +124,7 @@ CM_ SG_ 2550138624 JumpResetVecLsb "JUMP_INFO payload byte 7: reset vector[7:0].
 VAL_ 2550138625 Command 1 "CMD_ERASE_FLASH" 2 "CMD_WRITE_FLASH" 3 "CMD_READ_FLASH" 4 "CMD_JUMP_TO_APP" 5 "CMD_GET_STATUS" 6 "CMD_SET_ADDRESS" 7 "CMD_WRITE_DATA" 8 "CMD_GET_ACTIVE_BANK" 9 "CMD_SET_IMAGE_INFO" 10 "CMD_VERIFY_BANK" ;
 
 VAL_ 2550138624 ResponseCode 16 "RESP_ACK" 17 "RESP_NACK" 18 "RESP_ERROR" 19 "RESP_BUSY" 20 "RESP_READY" 21 "RESP_DATA" 22 "RESP_JUMP_INFO" ;
+VAL_ 2550138624 ReadyCode1 1 "READY_HEARTBEAT" 165 "READY_RECOVERY_PATH" 170 "READY_TIMEOUT_PATH" 255 "READY_JUMP_PENDING" ;
 VAL_ 2550138624 HeartbeatState 0 "BL_STATE_IDLE" 1 "BL_STATE_ERASING" 2 "BL_STATE_WRITING" 3 "BL_STATE_READING" 4 "BL_STATE_VERIFYING" 5 "BL_STATE_JUMPING" ;
 VAL_ 2550138624 HeartbeatLastError 0 "ERR_NONE" 1 "ERR_INVALID_COMMAND" 2 "ERR_INVALID_ADDRESS" 3 "ERR_FLASH_ERASE_FAILED" 4 "ERR_FLASH_WRITE_FAILED" 5 "ERR_INVALID_DATA_LENGTH" 6 "ERR_NO_VALID_APP" 7 "ERR_TIMEOUT" 8 "ERR_CRC_MISMATCH" ;
 VAL_ 2550138624 HeartbeatActiveBankB 0 "BANK_A_ACTIVE" 1 "BANK_B_ACTIVE" ;
@@ -164,9 +141,3 @@ VAL_ 2550138624 HeartbeatBankBCrcOk 0 "BANK_B_CRC_FAIL" 1 "BANK_B_CRC_OK" ;
 // Extended CAN ID markers
 BA_ "VFrameFormat" BO_ 2550138625 1;
 BA_ "VFrameFormat" BO_ 2550138624 1;
-BA_ "VFrameFormat" BO_ 2297433858 1;
-BA_ "VFrameFormat" BO_ 2297437954 1;
-BA_ "VFrameFormat" BO_ 2297442050 1;
-BA_ "VFrameFormat" BO_ 2297446146 1;
-BA_ "VFrameFormat" BO_ 2297450242 1;
-BA_ "VFrameFormat" BO_ 2297454338 1;
